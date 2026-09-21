@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Menu | ChopOps</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: "#F4511E",
+                        dark: "#171717",
+                        cream: "#FFF8F4"
+                    }
+                }
+            }
+        }
+    </script>
+
+</head>
+
+
+<body class="bg-gray-50 text-dark">
+
+
+    <!-- NAVBAR -->
+
+    <nav class="border-b bg-white">
+
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+
+            <a
+                href="../index.html"
+                class="text-2xl font-bold text-brand">
+                ChopOps
+            </a>
+
+
+            <div class="hidden items-center gap-6 md:flex">
+
+                <a
+                    href="../index.html"
+                    class="text-gray-700 hover:text-brand">
+                    Home
+                </a>
+
+                <a
+                    href="menu.html"
+                    class="font-semibold text-brand">
+                    Menu
+                </a>
+
+                <a
+                    href="reservation.html"
+                    class="text-gray-700 hover:text-brand">
+                    Reservation
+                </a>
+
+                <a
+                    href="cart.html"
+                    class="text-gray-700 hover:text-brand">
+                    Cart
+                </a>
+
+            </div>
+
+
+            <div class="flex items-center gap-2">
+
+                <a
+                    href="login.html"
+                    class="rounded-lg border border-brand px-4 py-2 text-sm font-semibold text-brand">
+                    Login
+                </a>
+
+                <a
+                    href="register.html"
+                    class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white">
+                    Sign Up
+                </a>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- PAGE HEADER -->
+
+    <section class="bg-cream">
+
+        <div class="mx-auto max-w-7xl px-6 py-14">
+
+            <p class="font-semibold uppercase tracking-wide text-brand">
+                ChopOps Menu
+            </p>
+
+            <h1 class="mt-2 text-4xl font-extrabold md:text-5xl">
+                What would you like to eat?
+            </h1>
+
+            <p class="mt-4 max-w-2xl text-gray-600">
+                Search through our available meals and add your favourites
+                to your cart.
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- SEARCH AND FILTER -->
+
+    <section class="mx-auto max-w-7xl px-6 py-8">
+
+        <div class="rounded-2xl bg-white p-6 shadow-sm">
+
+
+            <!-- SEARCH -->
+
+            <div class="relative">
+
+                <span
+                    class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    🔍
+                </span>
+
+                <input
+                    id="menu-search"
+                    type="search"
+                    placeholder="Search for meals..."
+                    class="w-full rounded-xl border border-gray-300 py-4 pl-12 pr-4 outline-none transition focus:border-brand focus:ring-2 focus:ring-orange-100"
+                >
+
+            </div>
+
+
+            <!-- CATEGORY FILTER -->
+
+            <div class="mt-5 flex flex-wrap gap-3">
+
+                <button
+                    class="category-button rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white"
+                    data-category="all">
+                    All
+                </button>
+
+                <button
+                    class="category-button rounded-full border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-700 hover:border-brand hover:text-brand"
+                    data-category="main">
+                    Main Meals
+                </button>
+
+                <button
+                    class="category-button rounded-full border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-700 hover:border-brand hover:text-brand"
+                    data-category="chicken">
+                    Chicken
+                </button>
+
+                <button
+                    class="category-button rounded-full border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-700 hover:border-brand hover:text-brand"
+                    data-category="snacks">
+                    Snacks
+                </button>
+
+                <button
+                    class="category-button rounded-full border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-700 hover:border-brand hover:text-brand"
+                    data-category="drinks">
+                    Drinks
+                </button>
+
+                <button
+                    class="category-button rounded-full border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-700 hover:border-brand hover:text-brand"
+                    data-category="desserts">
+                    Desserts
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- MENU -->
+
+    <main class="mx-auto max-w-7xl px-6 pb-16">
+
+
+        <!-- RESULT INFORMATION -->
+
+        <div class="mb-6 flex items-center justify-between">
+
+            <h2 class="text-2xl font-bold">
+                Available Meals
+            </h2>
+
+            <p
+                id="menu-count"
+                class="text-sm text-gray-500">
+                Loading...
+            </p>
+
+        </div>
+
+
+        <!-- MENU ITEMS -->
+
+        <div
+            id="menu-container"
+            class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+
+            <div class="col-span-full py-12 text-center">
+
+                <p class="text-gray-500">
+                    Loading menu...
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- NO RESULTS -->
+
+        <div
+            id="no-results"
+            class="hidden rounded-2xl bg-white py-16 text-center">
+
+            <div class="text-5xl">
+                🍽️
+            </div>
+
+            <h3 class="mt-4 text-xl font-bold">
+                No meals found
+            </h3>
+
+            <p class="mt-2 text-gray-500">
+                Try searching for another meal or category.
+            </p>
+
+        </div>
+
+    </main>
+
+
+
+    <!-- FOOTER -->
+
+    <footer class="border-t bg-white">
+
+        <div class="mx-auto flex max-w-7xl flex-col justify-between gap-4 px-6 py-8 md:flex-row">
+
+            <p class="font-bold text-brand">
+                ChopOps
+            </p>
+
+            <p class="text-sm text-gray-500">
+                © 2026 ChopOps. All rights reserved.
+            </p>
+
+        </div>
+
+    </footer>
+
+
+
+    <!-- MENU JAVASCRIPT -->
+
+    <script src="../js/menu.js"></script>
+
+
+</body>
+
+</html>
+

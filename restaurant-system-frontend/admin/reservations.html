@@ -1,0 +1,2043 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Reservations | ChopOps Admin</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+
+        tailwind.config = {
+
+            theme: {
+
+                extend: {
+
+                    colors: {
+
+                        brand: {
+
+                            50: "#fff7ed",
+                            100: "#ffedd5",
+                            500: "#f97316",
+                            600: "#ea580c",
+                            700: "#c2410c"
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        };
+
+    </script>
+
+</head>
+
+
+<body class="bg-gray-100 text-gray-800">
+
+
+<div class="min-h-screen flex">
+
+
+    <!-- SIDEBAR -->
+
+    <aside
+        id="sidebar"
+        class="fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-300"
+    >
+
+        <div class="h-full flex flex-col">
+
+
+            <!-- LOGO -->
+
+            <div class="px-6 py-6 border-b">
+
+                <div class="flex items-center gap-3">
+
+                    <div
+                        class="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white font-bold text-xl"
+                    >
+                        C
+                    </div>
+
+                    <div>
+
+                        <h1 class="font-bold text-xl text-gray-900">
+                            ChopOps
+                        </h1>
+
+                        <p class="text-xs text-gray-500">
+                            Admin Panel
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- NAVIGATION -->
+
+            <nav class="flex-1 px-4 py-6 space-y-2">
+
+
+                <a
+                    href="dashboard.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600"
+                >
+
+                    <span>📊</span>
+
+                    <span>Dashboard</span>
+
+                </a>
+
+
+                <a
+                    href="customers.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600"
+                >
+
+                    <span>👥</span>
+
+                    <span>Customers</span>
+
+                </a>
+
+
+                <a
+                    href="orders.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600"
+                >
+
+                    <span>🛒</span>
+
+                    <span>Orders</span>
+
+                </a>
+
+
+                <a
+                    href="reservations.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg bg-orange-50 text-orange-600 font-semibold"
+                >
+
+                    <span>📅</span>
+
+                    <span>Reservations</span>
+
+                </a>
+
+
+                <a
+                    href="menu.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600"
+                >
+
+                    <span>🍔</span>
+
+                    <span>Menu</span>
+
+                </a>
+
+
+            </nav>
+
+
+            <!-- LOGOUT -->
+
+            <div class="p-4 border-t">
+
+                <button
+                    id="logout-btn"
+                    class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50"
+                >
+
+                    <span>🚪</span>
+
+                    <span>Logout</span>
+
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- MAIN -->
+
+    <div class="flex-1 min-w-0">
+
+
+        <!-- HEADER -->
+
+        <header class="bg-white border-b border-gray-200">
+
+            <div
+                class="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between"
+            >
+
+                <div class="flex items-center gap-4">
+
+
+                    <button
+                        id="menu-toggle"
+                        class="lg:hidden p-2 rounded-lg hover:bg-gray-100"
+                    >
+                        ☰
+                    </button>
+
+
+                    <div>
+
+                        <h2 class="text-2xl font-bold text-gray-900">
+                            Reservations
+                        </h2>
+
+                        <p class="text-sm text-gray-500">
+                            Manage customer table reservations.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="hidden sm:block">
+
+                    <span
+                        id="admin-name"
+                        class="text-sm font-medium text-gray-700"
+                    >
+                        Admin
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- CONTENT -->
+
+        <main class="p-4 sm:p-6 lg:p-8">
+
+
+            <!-- SEARCH / FILTER -->
+
+            <div
+                class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6"
+            >
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
+                    <input
+                        type="text"
+                        id="search-input"
+                        placeholder="Search customer, phone or reservation..."
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    >
+
+
+                    <input
+                        type="date"
+                        id="date-filter"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    >
+
+
+                </div>
+
+            </div>
+
+
+
+            <!-- LOADING -->
+
+            <div
+                id="loading"
+                class="bg-white rounded-xl border border-gray-200 p-10 text-center"
+            >
+
+                <div
+                    class="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"
+                ></div>
+
+                <p class="text-gray-500">
+                    Loading reservations...
+                </p>
+
+            </div>
+
+
+
+            <!-- ERROR -->
+
+            <div
+                id="error-message"
+                class="hidden bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 mb-6"
+            ></div>
+
+
+
+            <!-- TABLE -->
+
+            <div
+                id="reservations-wrapper"
+                class="hidden bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+            >
+
+                <div class="overflow-x-auto">
+
+                    <table class="w-full">
+
+                        <thead class="bg-gray-50 border-b">
+
+                            <tr>
+
+                                <th
+                                    class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase"
+                                >
+                                    Customer
+                                </th>
+
+                                <th
+                                    class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase"
+                                >
+                                    Phone
+                                </th>
+
+                                <th
+                                    class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase"
+                                >
+                                    Date
+                                </th>
+
+                                <th
+                                    class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase"
+                                >
+                                    Time
+                                </th>
+
+                                <th
+                                    class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase"
+                                >
+                                    Guests
+                                </th>
+
+                                <th
+                                    class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase"
+                                >
+                                    Table
+                                </th>
+
+                                <th
+                                    class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase"
+                                >
+                                    Status
+                                </th>
+
+                                <th
+                                    class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase"
+                                >
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody
+                            id="reservations-table"
+                            class="divide-y divide-gray-100"
+                        ></tbody>
+
+                    </table>
+
+                </div>
+
+
+
+                <!-- EMPTY -->
+
+                <div
+                    id="no-reservations"
+                    class="hidden text-center py-12"
+                >
+
+                    <div class="text-5xl mb-4">
+                        📅
+                    </div>
+
+                    <h3 class="font-semibold text-gray-900 text-lg">
+                        No reservations found
+                    </h3>
+
+                    <p class="text-gray-500 mt-1">
+                        There are no reservations matching your search.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        </main>
+
+    </div>
+
+</div>
+
+
+
+<!-- CONFIRM RESERVATION MODAL -->
+
+<div
+    id="confirm-modal"
+    class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+>
+
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
+
+        <div class="p-6">
+
+            <h3 class="text-xl font-bold text-gray-900">
+                Confirm Reservation
+            </h3>
+
+            <p class="text-gray-500 text-sm mt-2">
+                Enter the table number that will be assigned to this customer.
+            </p>
+
+
+            <div class="mt-5">
+
+                <label
+                    for="table-number"
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                >
+                    Table Number
+                </label>
+
+                <input
+                    type="number"
+                    id="table-number"
+                    min="1"
+                    placeholder="e.g. 5"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+
+            </div>
+
+
+            <div
+                id="modal-error"
+                class="hidden mt-3 text-sm text-red-600"
+            ></div>
+
+
+            <div class="flex gap-3 mt-6">
+
+                <button
+                    id="cancel-modal"
+                    class="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                    Cancel
+                </button>
+
+
+                <button
+                    id="confirm-modal-btn"
+                    class="flex-1 px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+                >
+                    Confirm
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+
+const API_URL =
+    "http://localhost:8000/api";
+
+
+const token =
+    localStorage.getItem("token");
+
+
+const storedUser =
+    localStorage.getItem("user");
+
+
+let currentUser = null;
+
+
+try {
+
+    currentUser =
+        storedUser
+            ? JSON.parse(storedUser)
+            : null;
+
+} catch {
+
+    currentUser = null;
+
+}
+
+
+
+/*
+|--------------------------------------------------------------------------
+| AUTH CHECK
+|--------------------------------------------------------------------------
+*/
+
+if (!token) {
+
+    window.location.href =
+        "../pages/login.html";
+
+}
+
+
+if (
+    currentUser &&
+    currentUser.role &&
+    currentUser.role !== "admin" &&
+    currentUser.role !== "staff"
+) {
+
+    alert(
+        "You do not have permission to access the admin panel."
+    );
+
+    window.location.href =
+        "../index.html";
+
+}
+
+
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN NAME
+|--------------------------------------------------------------------------
+*/
+
+if (
+    currentUser &&
+    currentUser.name
+) {
+
+    document.getElementById(
+        "admin-name"
+    ).textContent =
+        currentUser.name;
+
+}
+
+
+
+/*
+|--------------------------------------------------------------------------
+| ELEMENTS
+|--------------------------------------------------------------------------
+*/
+
+const reservationsTable =
+    document.getElementById(
+        "reservations-table"
+    );
+
+
+const loading =
+    document.getElementById(
+        "loading"
+    );
+
+
+const reservationsWrapper =
+    document.getElementById(
+        "reservations-wrapper"
+    );
+
+
+const errorMessage =
+    document.getElementById(
+        "error-message"
+    );
+
+
+const noReservations =
+    document.getElementById(
+        "no-reservations"
+    );
+
+
+const searchInput =
+    document.getElementById(
+        "search-input"
+    );
+
+
+const dateFilter =
+    document.getElementById(
+        "date-filter"
+    );
+
+
+let allReservations = [];
+
+
+let selectedReservationId = null;
+
+
+
+/*
+|--------------------------------------------------------------------------
+| GET RESERVATION ID
+|--------------------------------------------------------------------------
+*/
+
+function getReservationId(
+    reservation
+) {
+
+    if (
+        !reservation ||
+        !reservation._id
+    ) {
+
+        return "";
+
+    }
+
+
+    if (
+        typeof reservation._id ===
+        "string"
+    ) {
+
+        return reservation._id;
+
+    }
+
+
+    if (
+        typeof reservation._id ===
+        "object"
+    ) {
+
+        if (
+            reservation._id.$oid
+        ) {
+
+            return String(
+                reservation._id.$oid
+            );
+
+        }
+
+
+        if (
+            reservation._id.oid
+        ) {
+
+            return String(
+                reservation._id.oid
+            );
+
+        }
+
+
+        if (
+            reservation._id.id
+        ) {
+
+            return String(
+                reservation._id.id
+            );
+
+        }
+
+    }
+
+
+    return String(
+        reservation._id
+    );
+
+}
+
+
+
+/*
+|--------------------------------------------------------------------------
+| ESCAPE HTML
+|--------------------------------------------------------------------------
+*/
+
+function escapeHtml(value) {
+
+    return String(
+        value ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+
+/*
+|--------------------------------------------------------------------------
+| FORMAT DATE
+|--------------------------------------------------------------------------
+*/
+
+function formatDate(
+    value
+) {
+
+    if (!value) {
+
+        return "N/A";
+
+    }
+
+
+    try {
+
+        let date;
+
+
+        if (
+            typeof value ===
+            "object"
+        ) {
+
+            if (
+                value.$date
+            ) {
+
+                value =
+                    value.$date;
+
+            } else if (
+                value.date
+            ) {
+
+                value =
+                    value.date;
+
+            }
+
+        }
+
+
+        if (
+            typeof value ===
+            "number"
+        ) {
+
+            date =
+                new Date(value);
+
+        } else {
+
+            date =
+                new Date(value);
+
+        }
+
+
+        if (
+            isNaN(
+                date.getTime()
+            )
+        ) {
+
+            return "N/A";
+
+        }
+
+
+        return date.toLocaleDateString(
+            "en-NG",
+            {
+                year: "numeric",
+                month: "short",
+                day: "numeric"
+            }
+        );
+
+    } catch {
+
+        return "N/A";
+
+    }
+
+}
+
+
+
+/*
+|--------------------------------------------------------------------------
+| STATUS BADGE
+|--------------------------------------------------------------------------
+*/
+
+function getStatusBadge(
+    status
+) {
+
+    const value =
+        String(
+            status ||
+            "requested"
+        )
+        .toLowerCase();
+
+
+    const classes = {
+
+        requested:
+            "bg-yellow-100 text-yellow-700",
+
+        confirmed:
+            "bg-blue-100 text-blue-700",
+
+        seated:
+            "bg-purple-100 text-purple-700",
+
+        completed:
+            "bg-green-100 text-green-700",
+
+        cancelled:
+            "bg-red-100 text-red-700"
+
+    };
+
+
+    return `
+
+        <span
+            class="inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
+                classes[value] ||
+                "bg-gray-100 text-gray-700"
+            }"
+        >
+
+            ${
+                value.charAt(0).toUpperCase() +
+                value.slice(1)
+            }
+
+        </span>
+
+    `;
+
+}
+
+
+
+/*
+|--------------------------------------------------------------------------
+| LOAD RESERVATIONS
+|--------------------------------------------------------------------------
+*/
+
+async function loadReservations() {
+
+    loading.classList.remove(
+        "hidden"
+    );
+
+
+    reservationsWrapper.classList.add(
+        "hidden"
+    );
+
+
+    errorMessage.classList.add(
+        "hidden"
+    );
+
+
+    try {
+
+        let url =
+            `${API_URL}/reservations`;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | OPTIONAL DATE FILTER
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            dateFilter.value
+        ) {
+
+            url +=
+                `?date=${encodeURIComponent(
+                    dateFilter.value
+                )}`;
+
+        }
+
+
+        const response =
+            await fetch(
+                url,
+                {
+                    method: "GET",
+
+                    headers: {
+
+                        "Authorization":
+                            `Bearer ${token}`,
+
+                        "Content-Type":
+                            "application/json"
+
+                    }
+
+                }
+            );
+
+
+        const text =
+            await response.text();
+
+
+        let data;
+
+
+        try {
+
+            data =
+                JSON.parse(text);
+
+        } catch {
+
+            throw new Error(
+                "The server returned an invalid response."
+            );
+
+        }
+
+
+        console.log(
+            "Reservations response:",
+            response.status,
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                data.message ||
+                `Server returned ${response.status}`
+            );
+
+        }
+
+
+        if (
+            Array.isArray(data)
+        ) {
+
+            allReservations =
+                data;
+
+        } else if (
+            Array.isArray(
+                data.reservations
+            )
+        ) {
+
+            allReservations =
+                data.reservations;
+
+        } else if (
+            Array.isArray(
+                data.data
+            )
+        ) {
+
+            allReservations =
+                data.data;
+
+        } else {
+
+            allReservations = [];
+
+        }
+
+
+        renderReservations(
+            allReservations
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "LOAD RESERVATIONS ERROR:",
+            error
+        );
+
+
+        errorMessage.textContent =
+            "Could not load reservations: " +
+            error.message;
+
+
+        errorMessage.classList.remove(
+            "hidden"
+        );
+
+    } finally {
+
+        loading.classList.add(
+            "hidden"
+        );
+
+
+        reservationsWrapper.classList.remove(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+
+/*
+|--------------------------------------------------------------------------
+| RENDER RESERVATIONS
+|--------------------------------------------------------------------------
+*/
+
+function renderReservations(
+    reservations
+) {
+
+    reservationsTable.innerHTML =
+        "";
+
+
+    if (
+        !reservations ||
+        reservations.length === 0
+    ) {
+
+        noReservations.classList.remove(
+            "hidden"
+        );
+
+        return;
+
+    }
+
+
+    noReservations.classList.add(
+        "hidden"
+    );
+
+
+    reservations.forEach(
+        reservation => {
+
+
+            const id =
+                getReservationId(
+                    reservation
+                );
+
+
+            const customerName =
+                reservation.customerName ||
+                reservation.user?.name ||
+                "Customer";
+
+
+            const phone =
+                reservation.phone ||
+                "N/A";
+
+
+            const time =
+                reservation.time ||
+                "N/A";
+
+
+            const partySize =
+                reservation.partySize ||
+                "N/A";
+
+
+            const tableNumber =
+                reservation.tableNumber ||
+                "Not assigned";
+
+
+            const status =
+                String(
+                    reservation.status ||
+                    "requested"
+                ).toLowerCase();
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.className =
+                "hover:bg-gray-50";
+
+
+            row.innerHTML = `
+
+                <!-- CUSTOMER -->
+
+                <td class="px-6 py-4">
+
+                    <div class="font-semibold text-gray-900">
+
+                        ${escapeHtml(
+                            customerName
+                        )}
+
+                    </div>
+
+                    <div class="text-xs text-gray-400 mt-1">
+
+                        ${escapeHtml(
+                            id.substring(
+                                0,
+                                8
+                            )
+                        )}
+
+                    </div>
+
+                </td>
+
+
+                <!-- PHONE -->
+
+                <td class="px-6 py-4">
+
+                    <span class="text-gray-700">
+
+                        ${escapeHtml(
+                            phone
+                        )}
+
+                    </span>
+
+                </td>
+
+
+                <!-- DATE -->
+
+                <td class="px-6 py-4">
+
+                    <span class="text-gray-700">
+
+                        ${formatDate(
+                            reservation.date
+                        )}
+
+                    </span>
+
+                </td>
+
+
+                <!-- TIME -->
+
+                <td class="px-6 py-4">
+
+                    <span class="text-gray-700">
+
+                        ${escapeHtml(
+                            time
+                        )}
+
+                    </span>
+
+                </td>
+
+
+                <!-- PARTY SIZE -->
+
+                <td class="px-6 py-4">
+
+                    <span class="font-medium">
+
+                        ${escapeHtml(
+                            partySize
+                        )}
+
+                    </span>
+
+                </td>
+
+
+                <!-- TABLE -->
+
+                <td class="px-6 py-4">
+
+                    <span class="text-gray-700">
+
+                        ${escapeHtml(
+                            tableNumber
+                        )}
+
+                    </span>
+
+                </td>
+
+
+                <!-- STATUS -->
+
+                <td class="px-6 py-4">
+
+                    ${getStatusBadge(
+                        status
+                    )}
+
+                </td>
+
+
+                <!-- ACTION -->
+
+                <td class="px-6 py-4">
+
+                    <div class="flex flex-col gap-2">
+
+
+                        ${
+                            status ===
+                            "requested"
+
+                            ? `
+
+                                <button
+                                    class="confirm-btn px-3 py-2 bg-orange-500 text-white rounded-lg text-sm hover:bg-orange-600"
+                                    data-id="${escapeHtml(id)}"
+                                >
+                                    Confirm
+                                </button>
+
+                            `
+
+                            : ""
+
+                        }
+
+
+                        <select
+                            class="reservation-status-select border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            data-id="${escapeHtml(id)}"
+                        >
+
+                            <option
+                                value="requested"
+                                ${
+                                    status ===
+                                    "requested"
+                                        ? "selected"
+                                        : ""
+                                }
+                            >
+                                Requested
+                            </option>
+
+
+                            <option
+                                value="confirmed"
+                                ${
+                                    status ===
+                                    "confirmed"
+                                        ? "selected"
+                                        : ""
+                                }
+                            >
+                                Confirmed
+                            </option>
+
+
+                            <option
+                                value="seated"
+                                ${
+                                    status ===
+                                    "seated"
+                                        ? "selected"
+                                        : ""
+                                }
+                            >
+                                Seated
+                            </option>
+
+
+                            <option
+                                value="completed"
+                                ${
+                                    status ===
+                                    "completed"
+                                        ? "selected"
+                                        : ""
+                                }
+                            >
+                                Completed
+                            </option>
+
+
+                            <option
+                                value="cancelled"
+                                ${
+                                    status ===
+                                    "cancelled"
+                                        ? "selected"
+                                        : ""
+                                }
+                            >
+                                Cancelled
+                            </option>
+
+                        </select>
+
+
+                    </div>
+
+                </td>
+
+            `;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CONFIRM BUTTON
+            |--------------------------------------------------------------------------
+            */
+
+            const confirmButton =
+                row.querySelector(
+                    ".confirm-btn"
+                );
+
+
+            if (
+                confirmButton
+            ) {
+
+                confirmButton.addEventListener(
+                    "click",
+                    function () {
+
+                        openConfirmModal(
+                            id
+                        );
+
+                    }
+                );
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | STATUS CHANGE
+            |--------------------------------------------------------------------------
+            */
+
+            const statusSelect =
+                row.querySelector(
+                    ".reservation-status-select"
+                );
+
+
+            statusSelect.addEventListener(
+                "change",
+                function () {
+
+                    updateReservationStatus(
+                        id,
+                        this.value
+                    );
+
+                }
+            );
+
+
+            reservationsTable.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+
+/*
+|--------------------------------------------------------------------------
+| OPEN CONFIRM MODAL
+|--------------------------------------------------------------------------
+*/
+
+function openConfirmModal(
+    id
+) {
+
+    selectedReservationId =
+        id;
+
+
+    document.getElementById(
+        "table-number"
+    ).value = "";
+
+
+    document.getElementById(
+        "modal-error"
+    ).classList.add(
+        "hidden"
+    );
+
+
+    document.getElementById(
+        "confirm-modal"
+    ).classList.remove(
+        "hidden"
+    );
+
+}
+
+
+
+/*
+|--------------------------------------------------------------------------
+| CLOSE CONFIRM MODAL
+|--------------------------------------------------------------------------
+*/
+
+function closeConfirmModal() {
+
+    selectedReservationId =
+        null;
+
+
+    document.getElementById(
+        "confirm-modal"
+    ).classList.add(
+        "hidden"
+    );
+
+}
+
+
+
+/*
+|--------------------------------------------------------------------------
+| CONFIRM RESERVATION
+|--------------------------------------------------------------------------
+*/
+
+async function confirmReservation() {
+
+    const tableNumber =
+        document.getElementById(
+            "table-number"
+        ).value;
+
+
+    const modalError =
+        document.getElementById(
+            "modal-error"
+        );
+
+
+    if (
+        !tableNumber ||
+        Number(tableNumber) < 1
+    ) {
+
+        modalError.textContent =
+            "Please enter a valid table number.";
+
+        modalError.classList.remove(
+            "hidden"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !selectedReservationId
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/reservations/${encodeURIComponent(
+                    selectedReservationId
+                )}/confirm`,
+                {
+
+                    method: "PATCH",
+
+                    headers: {
+
+                        "Authorization":
+                            `Bearer ${token}`,
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body: JSON.stringify({
+
+                        tableNumber:
+                            Number(
+                                tableNumber
+                            )
+
+                    })
+
+                }
+            );
+
+
+        const text =
+            await response.text();
+
+
+        let data;
+
+
+        try {
+
+            data =
+                JSON.parse(text);
+
+        } catch {
+
+            data = {
+                message: text
+            };
+
+        }
+
+
+        console.log(
+            "Confirm response:",
+            response.status,
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                data.message ||
+                `Server returned ${response.status}`
+            );
+
+        }
+
+
+        alert(
+            "Reservation confirmed successfully."
+        );
+
+
+        closeConfirmModal();
+
+
+        await loadReservations();
+
+
+    } catch (error) {
+
+        console.error(
+            "CONFIRM RESERVATION ERROR:",
+            error
+        );
+
+
+        modalError.textContent =
+            error.message;
+
+
+        modalError.classList.remove(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+
+/*
+|--------------------------------------------------------------------------
+| UPDATE RESERVATION STATUS
+|--------------------------------------------------------------------------
+*/
+
+async function updateReservationStatus(
+    id,
+    status
+) {
+
+    if (
+        !id ||
+        !status
+    ) {
+
+        return;
+
+    }
+
+
+    console.log(
+        "Updating reservation:",
+        id
+    );
+
+
+    console.log(
+        "New status:",
+        status
+    );
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/reservations/${encodeURIComponent(
+                    id
+                )}/status`,
+                {
+
+                    method: "PATCH",
+
+                    headers: {
+
+                        "Authorization":
+                            `Bearer ${token}`,
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body: JSON.stringify({
+
+                        status:
+                            status
+
+                    })
+
+                }
+            );
+
+
+        const text =
+            await response.text();
+
+
+        let data;
+
+
+        try {
+
+            data =
+                JSON.parse(text);
+
+        } catch {
+
+            data = {
+                message: text
+            };
+
+        }
+
+
+        console.log(
+            "Reservation status response:",
+            response.status,
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                data.message ||
+                `Server returned ${response.status}`
+            );
+
+        }
+
+
+        alert(
+            "Reservation status updated successfully."
+        );
+
+
+        await loadReservations();
+
+
+    } catch (error) {
+
+        console.error(
+            "UPDATE RESERVATION ERROR:",
+            error
+        );
+
+
+        alert(
+            "Could not update reservation:\n\n" +
+            error.message
+        );
+
+
+        await loadReservations();
+
+    }
+
+}
+
+
+
+/*
+|--------------------------------------------------------------------------
+| SEARCH
+|--------------------------------------------------------------------------
+*/
+
+searchInput.addEventListener(
+    "input",
+    function () {
+
+        applyFilters();
+
+    }
+);
+
+
+
+/*
+|--------------------------------------------------------------------------
+| DATE FILTER
+|--------------------------------------------------------------------------
+*/
+
+dateFilter.addEventListener(
+    "change",
+    function () {
+
+        loadReservations();
+
+    }
+);
+
+
+
+/*
+|--------------------------------------------------------------------------
+| APPLY SEARCH
+|--------------------------------------------------------------------------
+*/
+
+function applyFilters() {
+
+    const query =
+        searchInput.value
+            .trim()
+            .toLowerCase();
+
+
+    if (!query) {
+
+        renderReservations(
+            allReservations
+        );
+
+        return;
+
+    }
+
+
+    const filtered =
+        allReservations.filter(
+            reservation => {
+
+
+                const id =
+                    getReservationId(
+                        reservation
+                    )
+                    .toLowerCase();
+
+
+                const name =
+                    String(
+                        reservation.customerName ||
+                        ""
+                    )
+                    .toLowerCase();
+
+
+                const phone =
+                    String(
+                        reservation.phone ||
+                        ""
+                    )
+                    .toLowerCase();
+
+
+                const status =
+                    String(
+                        reservation.status ||
+                        ""
+                    )
+                    .toLowerCase();
+
+
+                const time =
+                    String(
+                        reservation.time ||
+                        ""
+                    )
+                    .toLowerCase();
+
+
+                return (
+
+                    id.includes(query) ||
+
+                    name.includes(query) ||
+
+                    phone.includes(query) ||
+
+                    status.includes(query) ||
+
+                    time.includes(query)
+
+                );
+
+            }
+        );
+
+
+    renderReservations(
+        filtered
+    );
+
+}
+
+
+
+/*
+|--------------------------------------------------------------------------
+| LOGOUT
+|--------------------------------------------------------------------------
+*/
+
+document
+    .getElementById(
+        "logout-btn"
+    )
+    .addEventListener(
+        "click",
+        function () {
+
+            localStorage.removeItem(
+                "token"
+            );
+
+            localStorage.removeItem(
+                "user"
+            );
+
+            window.location.href =
+                "../pages/login.html";
+
+        }
+    );
+
+
+
+/*
+|--------------------------------------------------------------------------
+| MOBILE SIDEBAR
+|--------------------------------------------------------------------------
+*/
+
+document
+    .getElementById(
+        "menu-toggle"
+    )
+    .addEventListener(
+        "click",
+        function () {
+
+            document
+                .getElementById(
+                    "sidebar"
+                )
+                .classList.toggle(
+                    "-translate-x-full"
+                );
+
+        }
+    );
+
+
+
+/*
+|--------------------------------------------------------------------------
+| MODAL BUTTONS
+|--------------------------------------------------------------------------
+*/
+
+document
+    .getElementById(
+        "cancel-modal"
+    )
+    .addEventListener(
+        "click",
+        closeConfirmModal
+    );
+
+
+document
+    .getElementById(
+        "confirm-modal-btn"
+    )
+    .addEventListener(
+        "click",
+        confirmReservation
+    );
+
+
+
+/*
+|--------------------------------------------------------------------------
+| CLOSE MODAL WHEN CLICKING BACKDROP
+|--------------------------------------------------------------------------
+*/
+
+document
+    .getElementById(
+        "confirm-modal"
+    )
+    .addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                event.target ===
+                this
+            ) {
+
+                closeConfirmModal();
+
+            }
+
+        }
+    );
+
+
+
+/*
+|--------------------------------------------------------------------------
+| START
+|--------------------------------------------------------------------------
+*/
+
+loadReservations();
+
+</script>
+
+
+</body>
+
+</html>

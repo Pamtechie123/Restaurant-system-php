@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ChopOps | Restaurant</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: "#F4511E",
+                        dark: "#171717",
+                        cream: "#FFF8F4"
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-white text-dark">
+
+    <!-- NAVBAR -->
+    <nav class="border-b bg-white">
+
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+
+            <!-- LOGO -->
+            <a href="index.html"
+               class="text-xl font-bold text-brand sm:text-2xl">
+                ChopOps
+            </a>
+
+
+            <!-- NAVIGATION -->
+            <div class="hidden items-center gap-6 md:flex">
+
+                <a href="index.html"
+                   class="text-gray-700 hover:text-brand">
+                    Home
+                </a>
+
+                <a href="pages/menu.html"
+                   class="text-gray-700 hover:text-brand">
+                    Menu
+                </a>
+
+                <a href="pages/reservation.html"
+                   class="text-gray-700 hover:text-brand">
+                    Reservation
+                </a>
+
+                <a href="pages/cart.html"
+                   class="text-gray-700 hover:text-brand">
+                    Cart
+                </a>
+
+            </div>
+
+
+            <!-- AUTH BUTTONS -->
+            <div
+                id="auth-buttons"
+                class="flex items-center gap-2">
+
+                <!-- JavaScript will change this -->
+                <a href="pages/login.html"
+                   class="rounded-lg border border-brand px-3 py-2 text-sm font-semibold text-brand sm:px-4">
+                    Login
+                </a>
+
+                <a href="pages/register.html"
+                   class="rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-white sm:px-4">
+                    Sign Up
+                </a>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+
+    <!-- HERO -->
+    <section class="bg-cream">
+
+        <div class="mx-auto grid max-w-7xl items-center gap-10 px-6 py-20 md:grid-cols-2">
+
+            <div>
+
+                <p class="mb-4 font-semibold uppercase tracking-wide text-brand">
+                    Welcome to ChopOps
+                </p>
+
+                <h1 class="text-4xl font-extrabold leading-tight md:text-6xl">
+                    Delicious meals,made just for you
+                    
+                </h1>
+
+                <p class="mt-6 max-w-xl text-lg leading-8 text-gray-600">
+                    Discover delicious meals, place orders and make
+                    reservations easily with ChopOps.
+                </p>
+
+                <div class="mt-8 flex gap-4">
+
+                    <a href="pages/menu.html"
+                       class="rounded-lg bg-brand px-6 py-3 font-semibold text-white">
+                        Explore Menu
+                    </a>
+
+                    <a href="pages/reservation.html"
+                       class="rounded-lg border border-gray-300 px-6 py-3 font-semibold">
+                        Reserve a Table
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <div class="rounded-3xl bg-white p-8 shadow-lg">
+
+                <div class="flex h-80 items-center justify-center rounded-2xl bg-gray-100">
+
+                    <p class="text-gray-400">
+                        Restaurant image
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FEATURED MENU -->
+    <section class="mx-auto max-w-7xl px-6 py-16">
+
+        <div class="mb-10 flex items-end justify-between">
+
+            <div>
+
+                <p class="font-semibold text-brand">
+                    OUR MENU
+                </p>
+
+                <h2 class="mt-2 text-3xl font-bold">
+                    Popular dishes
+                </h2>
+
+            </div>
+
+            <a href="pages/menu.html"
+               class="font-semibold text-brand">
+                View all →
+            </a>
+
+        </div>
+
+
+        <!-- JavaScript will put food here -->
+        <div
+            id="food-container"
+            class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+
+            <p class="text-gray-500">
+                Loading menu...
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- RESERVATION CTA -->
+    <section class="bg-dark">
+
+        <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-6 py-14 text-center md:flex-row md:text-left">
+
+            <div>
+
+                <h2 class="text-3xl font-bold text-white">
+                    Planning a meal with friends?
+                </h2>
+
+                <p class="mt-2 text-gray-300">
+                    Reserve your table before you arrive.
+                </p>
+
+            </div>
+
+            <a href="pages/reservation.html"
+               class="rounded-lg bg-brand px-7 py-3 font-semibold text-white">
+                Make Reservation
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer class="border-t bg-white">
+
+        <div class="mx-auto flex max-w-7xl flex-col justify-between gap-4 px-6 py-8 md:flex-row">
+
+            <p class="font-bold text-brand">
+                ChopOps
+            </p>
+
+            <p class="text-sm text-gray-500">
+                © 2026 ChopOps. All rights reserved.
+            </p>
+
+        </div>
+
+    </footer>
+
+
+    <!-- JavaScript -->
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+
+
+    <!-- AUTH NAVBAR -->
+    <script>
+
+        const authButtons =
+            document.getElementById("auth-buttons");
+
+
+        const token =
+            localStorage.getItem("token");
+
+
+        if (token) {
+
+            authButtons.innerHTML = `
+
+                <span class="hidden text-sm font-medium text-gray-700 sm:inline">
+                    Logged in
+                </span>
+
+                <button
+                    id="logout-button"
+                    class="rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-white sm:px-4">
+                    Logout
+                </button>
+
+            `;
+
+
+            document
+                .getElementById("logout-button")
+                .addEventListener("click", () => {
+
+                    localStorage.removeItem("token");
+
+                    window.location.reload();
+
+                });
+
+        }
+
+    </script>
+
+</body>
+</html>
+```

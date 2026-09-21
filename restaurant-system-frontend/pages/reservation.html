@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Reservation | ChopOps</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: "#F4511E"
+                    }
+                }
+            }
+        }
+    </script>
+
+</head>
+
+
+<body class="bg-gray-50">
+
+
+<header class="border-b bg-white">
+
+    <nav class="mx-auto flex max-w-7xl justify-between px-6 py-5">
+
+        <a href="../index.html"
+           class="text-2xl font-extrabold text-brand">
+            ChopOps
+        </a>
+
+        <a href="menu.html"
+           class="hover:text-brand">
+            Menu
+        </a>
+
+    </nav>
+
+</header>
+
+
+<main class="mx-auto max-w-2xl px-6 py-12">
+
+    <div class="rounded-2xl bg-white p-8 shadow">
+
+        <p class="font-semibold text-brand">
+            RESERVATION
+        </p>
+
+        <h1 class="mt-2 text-3xl font-bold">
+            Reserve a table
+        </h1>
+
+
+        <form id="reservation-form"
+              class="mt-8 space-y-5">
+
+
+            <div>
+
+                <label class="mb-2 block font-medium">
+                    Customer name
+                </label>
+
+                <input
+                    id="customerName"
+                    required
+                    class="w-full rounded-lg border px-4 py-3"
+                    placeholder="John Doe"
+                >
+
+            </div>
+
+
+            <div>
+
+                <label class="mb-2 block font-medium">
+                    Phone
+                </label>
+
+                <input
+                    id="phone"
+                    required
+                    class="w-full rounded-lg border px-4 py-3"
+                    placeholder="08012345678"
+                >
+
+            </div>
+
+
+            <div class="grid gap-5 sm:grid-cols-2">
+
+                <div>
+
+                    <label class="mb-2 block font-medium">
+                        Date
+                    </label>
+
+                    <input
+                        id="date"
+                        type="date"
+                        required
+                        class="w-full rounded-lg border px-4 py-3"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label class="mb-2 block font-medium">
+                        Time
+                    </label>
+
+                    <input
+                        id="time"
+                        type="time"
+                        required
+                        class="w-full rounded-lg border px-4 py-3"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <label class="mb-2 block font-medium">
+                    Party size
+                </label>
+
+                <input
+                    id="partySize"
+                    type="number"
+                    min="1"
+                    required
+                    class="w-full rounded-lg border px-4 py-3"
+                    placeholder="2"
+                >
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="w-full rounded-lg bg-brand px-5 py-3 font-semibold text-white"
+            >
+                Reserve Table
+            </button>
+
+
+            <p id="reservation-message"
+               class="text-center text-sm">
+            </p>
+
+        </form>
+
+    </div>
+
+</main>
+
+
+<script src="../js/reservation.js"></script>
+
+</body>
+
+</html>
