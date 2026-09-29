@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | ChopOps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/config.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header id="navbar" class="sticky top-0 z-40 bg-white/95 shadow-sm backdrop-blur"></header>
+
+    <main class="mx-auto grid max-w-5xl gap-8 px-4 py-8 md:grid-cols-3">
+        <form id="checkout-form" class="card space-y-5 p-6 md:col-span-2">
+            <h1 class="text-3xl font-extrabold">Checkout</h1>
+
+            <!-- Order type -->
+            <div>
+                <p class="label">How would you like your order?</p>
+                <div class="grid grid-cols-3 gap-3">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="orderType" value="delivery" class="peer sr-only" checked>
+                        <div class="rounded-xl border-2 border-gray-200 p-3 text-center font-semibold peer-checked:border-brand peer-checked:bg-brand-light">Delivery</div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="orderType" value="takeaway" class="peer sr-only">
+                        <div class="rounded-xl border-2 border-gray-200 p-3 text-center font-semibold peer-checked:border-brand peer-checked:bg-brand-light">Takeaway</div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="orderType" value="dine-in" class="peer sr-only">
+                        <div class="rounded-xl border-2 border-gray-200 p-3 text-center font-semibold peer-checked:border-brand peer-checked:bg-brand-light">Dine-in</div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Delivery details -->
+            <div id="delivery-fields" class="space-y-4">
+                <div>
+                    <label for="address" class="label">Delivery address</label>
+                    <input id="address" class="input" placeholder="House number and street">
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="state" class="label">State</label>
+                        <input id="state" class="input" placeholder="e.g. Lagos">
+                    </div>
+                    <div>
+                        <label for="city" class="label">City</label>
+                        <input id="city" class="input" placeholder="e.g. Ikeja">
+                    </div>
+                </div>
+                <div>
+                    <label for="phone" class="label">Phone number</label>
+                    <input id="phone" type="tel" class="input" placeholder="080...">
+                </div>
+            </div>
+
+            <!-- Dine-in details -->
+            <div id="dinein-fields" class="hidden">
+                <label for="reservation" class="label">Your reservation</label>
+                <select id="reservation" class="input"></select>
+                <p id="dinein-note" class="mt-2 text-sm text-ink/60"></p>
+            </div>
+
+            <p id="message" class="hidden text-sm text-red-600"></p>
+            <button id="place" class="btn w-full py-3 text-lg">Place order</button>
+        </form>
+
+        <!-- Order summary -->
+        <aside class="card h-fit p-6">
+            <h2 class="text-xl font-bold">Order summary</h2>
+            <div id="summary" class="mt-4 space-y-2 text-sm"></div>
+        </aside>
+    </main>
+
+    <footer id="footer"></footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        if (requireLogin() && getCart().length === 0) location.href = "cart.html";
+
+        const form = document.getElementById("checkout-form");
+        const message = document.getElementById("message");
+        const deliveryBox = document.getElementById("delivery-fields");
+        const dineInBox = document.getElementById("dinein-fields");
+        const reservationSelect = document.getElementById("reservation");
+
+        function orderType() {
+            return form.querySelector('input[name="orderType"]:checked').value;
+        }
+
+        // Summary on the right
+        document.getElementById("summary").innerHTML =
+            getCart().map((item) => `
+                <div class="flex justify-between gap-2">
+                    <span>${item.quantity} × ${esc(item.name)}</span>
+                    <span>${money(item.price * item.quantity)}</span>
+                </div>`).join("") +
+            `<div class="mt-3 flex justify-between border-t pt-3 text-lg font-extrabold">
+                <span>Total</span><span>${money(cartTotal())}</span>
+            </div>`;
+
+        // Show only the fields needed for the chosen order type
+        form.addEventListener("change", () => {
+            deliveryBox.classList.toggle("hidden", orderType() !== "delivery");
+            dineInBox.classList.toggle("hidden", orderType() !== "dine-in");
+        });
+
+        // Dine-in orders are linked to one of the customer's confirmed reservations
+        api("/reservations/mine")
+            .then((reservations) => {
+                const usable = reservations.filter((r) => r.status === "confirmed" || r.status === "seated");
+
+                reservationSelect.innerHTML = usable
+                    .map((r) => `<option value="${r.id}">${formatDay(r.date)} at ${esc(r.time)} - Table ${r.tableNumber}</option>`)
+                    .join("");
+
+                document.getElementById("dinein-note").innerHTML = usable.length
+                    ? ""
+                    : 'You have no confirmed reservation yet. <a href="reservation.html" class="font-bold text-brand">Reserve a table</a> first.';
+            })
+            .catch(() => {});
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            message.classList.add("hidden");
+
+            const body = {
+                orderType: orderType(),
+                items: getCart().map((item) => ({ menuItemId: item.id, quantity: item.quantity })),
+            };
+
+            if (body.orderType === "delivery") {
+                body.shippingAddress = document.getElementById("address").value;
+                body.state = document.getElementById("state").value;
+                body.city = document.getElementById("city").value;
+                body.phone = document.getElementById("phone").value;
+            }
+            if (body.orderType === "dine-in") {
+                body.reservationId = reservationSelect.value;
+            }
+
+            const button = document.getElementById("place");
+            button.disabled = true;
+
+            try {
+                const result = await api("/orders", { method: "POST", body });
+                saveCart([]);
+                location.href = "confirmation.html?id=" + result.id;
+            } catch (error) {
+                message.textContent = error.message;
+                message.classList.remove("hidden");
+                button.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

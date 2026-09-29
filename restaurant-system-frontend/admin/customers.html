@@ -1,877 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Customers | ChopOps Admin</title>
-
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            500: "#f97316",
-                            600: "#ea580c",
-                            700: "#c2410c"
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="../js/config.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
 </head>
+<body class="bg-gray-50 md:flex">
+    <aside id="sidebar" class="bg-ink text-white md:min-h-screen md:w-64 md:shrink-0"></aside>
 
+    <main class="flex-1 p-4 md:p-8">
+        <h1 class="text-3xl font-extrabold">Customers</h1>
+        <p class="text-ink/60">A deactivated customer cannot log in or place orders.</p>
 
-<body class="bg-gray-100 text-gray-800">
+        <input id="search" type="search" class="input mt-5 max-w-md" placeholder="Search by name or email...">
 
-
-<!-- =========================
-     MOBILE OVERLAY
-========================= -->
-
-<div
-    id="sidebar-overlay"
-    class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden">
-</div>
-
-
-<!-- =========================
-     SIDEBAR
-========================= -->
-
-<aside
-    id="sidebar"
-    class="fixed top-0 left-0 z-50 w-64 h-screen bg-white border-r border-gray-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
-
-    <div class="flex items-center justify-between h-20 px-6 border-b">
-
-        <div>
-
-            <h1 class="text-2xl font-bold text-orange-600">
-                ChopOps
-            </h1>
-
-            <p class="text-xs text-gray-500">
-                Admin Panel
-            </p>
-
+        <div class="card mt-4 overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="border-b bg-cream text-ink/70">
+                    <tr>
+                        <th class="p-3">Customer</th><th class="p-3">Joined</th><th class="p-3">Orders</th>
+                        <th class="p-3">Spent</th><th class="p-3">Status</th><th class="p-3"></th>
+                    </tr>
+                </thead>
+                <tbody id="customers"><tr><td colspan="6" class="p-4 text-ink/60">Loading...</td></tr></tbody>
+            </table>
         </div>
-
-        <button
-            id="close-sidebar"
-            class="lg:hidden text-gray-500 text-2xl">
-            ×
-        </button>
-
-    </div>
-
-
-    <nav class="p-4 space-y-2">
-
-        <a
-            href="dashboard.html"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100">
-            📊
-            <span>Dashboard</span>
-        </a>
-
-
-        <a
-            href="customers.html"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg bg-orange-100 text-orange-700 font-semibold">
-            👥
-            <span>Customers</span>
-        </a>
-
-
-        <a
-            href="orders.html"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100">
-            🛒
-            <span>Orders</span>
-        </a>
-
-
-        <a
-            href="reservations.html"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100">
-            📅
-            <span>Reservations</span>
-        </a>
-
-
-        <a
-            href="menu.html"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100">
-            🍔
-            <span>Menu Management</span>
-        </a>
-
-    </nav>
-
-
-    <div class="absolute bottom-0 left-0 right-0 p-4 border-t">
-
-        <button
-            id="logout-btn"
-            class="w-full px-4 py-3 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-medium">
-
-            ↪ Logout
-
-        </button>
-
-    </div>
-
-</aside>
-
-
-<!-- =========================
-     MAIN CONTENT
-========================= -->
-
-<div class="lg:ml-64 min-h-screen">
-
-
-    <!-- TOP BAR -->
-
-    <header class="bg-white border-b sticky top-0 z-30">
-
-        <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-20">
-
-            <div class="flex items-center gap-4">
-
-                <button
-                    id="open-sidebar"
-                    class="lg:hidden text-2xl">
-                    ☰
-                </button>
-
-                <div>
-
-                    <h2 class="text-xl sm:text-2xl font-bold">
-                        Customers
-                    </h2>
-
-                    <p class="text-sm text-gray-500">
-                        View and manage registered customers
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="flex items-center gap-3">
-
-                <div class="hidden sm:block text-right">
-
-                    <p
-                        id="admin-name"
-                        class="font-semibold">
-                        Administrator
-                    </p>
-
-                    <p class="text-xs text-gray-500">
-                        Admin
-                    </p>
-
-                </div>
-
-
-                <div
-                    class="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold">
-                    A
-                </div>
-
-            </div>
-
-        </div>
-
-    </header>
-
-
-    <!-- PAGE CONTENT -->
-
-    <main class="p-4 sm:p-6 lg:p-8">
-
-
-        <!-- PAGE TITLE -->
-
-        <div class="mb-6">
-
-            <h1 class="text-2xl sm:text-3xl font-bold">
-                Customer Management
-            </h1>
-
-            <p class="text-gray-500 mt-1">
-                View customers registered on ChopOps.
-            </p>
-
-        </div>
-
-
-        <!-- SEARCH + COUNT -->
-
-        <div class="bg-white rounded-xl border shadow-sm p-5 mb-6">
-
-            <div class="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
-
-                <div class="relative w-full md:max-w-md">
-
-                    <input
-                        id="customer-search"
-                        type="text"
-                        placeholder="Search by name or email..."
-                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500">
-
-                </div>
-
-
-                <div class="text-sm text-gray-500">
-
-                    Total customers:
-
-                    <span
-                        id="customer-count"
-                        class="font-bold text-gray-900">
-                        0
-                    </span>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- ERROR -->
-
-        <div
-            id="error-message"
-            class="hidden mb-6 bg-red-50 border border-red-200 text-red-700 rounded-lg p-4">
-        </div>
-
-
-        <!-- CUSTOMERS TABLE -->
-
-        <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
-
-            <div class="overflow-x-auto">
-
-                <table class="w-full">
-
-                    <thead class="bg-gray-50 border-b">
-
-                        <tr>
-
-                            <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                                Customer
-                            </th>
-
-                            <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                                Email
-                            </th>
-
-                            <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                                Phone
-                            </th>
-
-                            <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                                Role
-                            </th>
-
-                            <th class="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                                ID
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody
-                        id="customers-table"
-                        class="divide-y divide-gray-100">
-
-                        <tr>
-
-                            <td
-                                colspan="5"
-                                class="px-6 py-10 text-center text-gray-400">
-
-                                Loading customers...
-
-                            </td>
-
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-
     </main>
 
-</div>
-
-
-<!-- =========================
-     JAVASCRIPT
-========================= -->
-
-<script>
-
-const API_URL = "http://localhost:8000/api";
-
-
-// ========================================
-// AUTHENTICATION
-// ========================================
-
-const token = localStorage.getItem("token");
-
-const storedUser =
-    localStorage.getItem("user");
-
-
-if (!token) {
-
-    window.location.href =
-        "../pages/login.html";
-
-}
-
-
-let currentUser = null;
-
-
-try {
-
-    currentUser =
-        storedUser
-            ? JSON.parse(storedUser)
-            : null;
-
-} catch (error) {
-
-    currentUser = null;
-
-}
-
-
-// Only admin/staff can access customers
-
-if (
-    !currentUser ||
-    (
-        currentUser.role !== "admin" &&
-        currentUser.role !== "staff"
-    )
-) {
-
-    window.location.href =
-        "../pages/login.html";
-
-}
-
-
-// Display logged-in user's name
-
-const adminName =
-    document.getElementById("admin-name");
-
-
-if (adminName && currentUser) {
-
-    adminName.textContent =
-        currentUser.name ||
-        "Administrator";
-
-}
-
-
-// ========================================
-// SIDEBAR
-// ========================================
-
-const sidebar =
-    document.getElementById("sidebar");
-
-const overlay =
-    document.getElementById("sidebar-overlay");
-
-const openSidebar =
-    document.getElementById("open-sidebar");
-
-const closeSidebar =
-    document.getElementById("close-sidebar");
-
-
-openSidebar.addEventListener(
-    "click",
-    () => {
-
-        sidebar.classList.remove(
-            "-translate-x-full"
-        );
-
-        overlay.classList.remove(
-            "hidden"
-        );
-
-    }
-);
-
-
-closeSidebar.addEventListener(
-    "click",
-    () => {
-
-        sidebar.classList.add(
-            "-translate-x-full"
-        );
-
-        overlay.classList.add(
-            "hidden"
-        );
-
-    }
-);
-
-
-overlay.addEventListener(
-    "click",
-    () => {
-
-        sidebar.classList.add(
-            "-translate-x-full"
-        );
-
-        overlay.classList.add(
-            "hidden"
-        );
-
-    }
-);
-
-
-// ========================================
-// LOGOUT
-// ========================================
-
-document
-    .getElementById("logout-btn")
-    .addEventListener("click", () => {
-
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-
-        window.location.href =
-            "../pages/login.html";
-
-    });
-
-
-// ========================================
-// LOAD CUSTOMERS
-// ========================================
-
-let allCustomers = [];
-
-
-async function loadCustomers() {
-
-    const table =
-        document.getElementById(
-            "customers-table"
-        );
-
-
-    try {
-
-        const response =
-            await fetch(
-                `${API_URL}/users/customers`,
-                {
-                    method: "GET",
-
-                    headers: {
-                        "Authorization":
-                            `Bearer ${token}`,
-
-                        "Content-Type":
-                            "application/json"
-                    }
-                }
-            );
-
-
-        const data =
-            await response.json();
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                data.error ||
-                "Failed to load customers"
-            );
-
+    <script src="../js/app.js"></script>
+    <script src="../js/admin.js"></script>
+    <script>
+        const table = document.getElementById("customers");
+        const searchInput = document.getElementById("search");
+        let customers = [];
+
+        function show() {
+            const text = searchInput.value.trim().toLowerCase();
+            const list = customers.filter((c) => c.name.toLowerCase().includes(text) || c.email.includes(text));
+
+            table.innerHTML = list.length
+                ? list.map((c) => `
+                <tr class="border-b last:border-0">
+                    <td class="p-3">
+                        <p class="font-bold">${esc(c.name)}</p>
+                        <p class="text-xs text-ink/60">${esc(c.email)}</p>
+                    </td>
+                    <td class="p-3">${c.createdAt ? formatDay(c.createdAt) : "-"}</td>
+                    <td class="p-3">${c.orders}</td>
+                    <td class="p-3">${money(c.spent)}</td>
+                    <td class="p-3">${badge(c.status)}</td>
+                    <td class="p-3 text-right">
+                        <button class="btn btn-sm ${c.status === "blocked" ? "" : "btn-danger"}"
+                                data-id="${c.id}" data-set="${c.status === "blocked" ? "active" : "blocked"}">
+                            ${c.status === "blocked" ? "Activate" : "Deactivate"}
+                        </button>
+                    </td>
+                </tr>`).join("")
+                : '<tr><td colspan="6" class="p-4 text-ink/60">No customers found.</td></tr>';
         }
 
-
-        allCustomers =
-            Array.isArray(data)
-                ? data
-                : [];
-
-
-        renderCustomers(
-            allCustomers
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Customer loading error:",
-            error
-        );
-
-
-        document
-            .getElementById(
-                "error-message"
-            )
-            .textContent =
-                error.message;
-
-
-        document
-            .getElementById(
-                "error-message"
-            )
-            .classList.remove(
-                "hidden"
-            );
-
-
-        table.innerHTML = `
-            <tr>
-                <td
-                    colspan="5"
-                    class="px-6 py-10 text-center text-red-500">
-                    Could not load customers.
-                </td>
-            </tr>
-        `;
-
-    }
-
-}
-
-
-// ========================================
-// RENDER CUSTOMERS
-// ========================================
-
-function renderCustomers(customers) {
-
-    const table =
-        document.getElementById(
-            "customers-table"
-        );
-
-
-    const count =
-        document.getElementById(
-            "customer-count"
-        );
-
-
-    count.textContent =
-        customers.length;
-
-
-    if (customers.length === 0) {
-
-        table.innerHTML = `
-            <tr>
-
-                <td
-                    colspan="5"
-                    class="px-6 py-10 text-center text-gray-400">
-
-                    No customers found.
-
-                </td>
-
-            </tr>
-        `;
-
-        return;
-
-    }
-
-
-    table.innerHTML =
-        customers.map(
-            (customer) => {
-
-                const id =
-                    customer._id ||
-                    customer.id ||
-                    "N/A";
-
-
-                const shortId =
-                    String(id).length > 14
-                        ? String(id).substring(
-                            0,
-                            14
-                          ) + "..."
-                        : String(id);
-
-
-                const name =
-                    customer.name ||
-                    "No name";
-
-
-                const email =
-                    customer.email ||
-                    "No email";
-
-
-                const phone =
-                    customer.phone ||
-                    "Not provided";
-
-
-                const role =
-                    customer.role ||
-                    "customer";
-
-
-                return `
-
-                    <tr class="hover:bg-gray-50">
-
-                        <td class="px-6 py-4">
-
-                            <div class="flex items-center gap-3">
-
-                                <div
-                                    class="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold">
-
-                                    ${escapeHtml(
-                                        name
-                                            .charAt(0)
-                                            .toUpperCase()
-                                    )}
-
-                                </div>
-
-
-                                <div>
-
-                                    <p class="font-semibold text-gray-900">
-
-                                        ${escapeHtml(
-                                            name
-                                        )}
-
-                                    </p>
-
-                                    <p class="text-xs text-gray-400">
-
-                                        Customer
-
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-                        </td>
-
-
-                        <td class="px-6 py-4 text-sm text-gray-600">
-
-                            ${escapeHtml(
-                                email
-                            )}
-
-                        </td>
-
-
-                        <td class="px-6 py-4 text-sm text-gray-600">
-
-                            ${escapeHtml(
-                                phone
-                            )}
-
-                        </td>
-
-
-                        <td class="px-6 py-4">
-
-                            <span
-                                class="inline-flex px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
-
-                                ${escapeHtml(
-                                    role
-                                )}
-
-                            </span>
-
-                        </td>
-
-
-                        <td class="px-6 py-4">
-
-                            <span
-                                class="text-xs font-mono text-gray-500"
-                                title="${escapeHtml(
-                                    String(id)
-                                )}">
-
-                                ${escapeHtml(
-                                    shortId
-                                )}
-
-                            </span>
-
-                        </td>
-
-                    </tr>
-
-                `;
-
+        async function load() {
+            try {
+                customers = await api("/admin/customers");
+                show();
+            } catch (error) {
+                table.innerHTML = `<tr><td colspan="6" class="p-4 text-red-600">${esc(error.message)}</td></tr>`;
             }
-        ).join("");
-
-}
-
-
-// ========================================
-// SEARCH CUSTOMERS
-// ========================================
-
-document
-    .getElementById(
-        "customer-search"
-    )
-    .addEventListener(
-        "input",
-        (event) => {
-
-            const search =
-                event.target.value
-                    .trim()
-                    .toLowerCase();
-
-
-            if (!search) {
-
-                renderCustomers(
-                    allCustomers
-                );
-
-                return;
-
-            }
-
-
-            const filtered =
-                allCustomers.filter(
-                    (customer) => {
-
-                        const name =
-                            String(
-                                customer.name || ""
-                            ).toLowerCase();
-
-
-                        const email =
-                            String(
-                                customer.email || ""
-                            ).toLowerCase();
-
-
-                        const phone =
-                            String(
-                                customer.phone || ""
-                            ).toLowerCase();
-
-
-                        return (
-                            name.includes(search) ||
-                            email.includes(search) ||
-                            phone.includes(search)
-                        );
-
-                    }
-                );
-
-
-            renderCustomers(
-                filtered
-            );
-
         }
-    );
 
+        searchInput.addEventListener("input", show);
 
-// ========================================
-// SECURITY: ESCAPE HTML
-// ========================================
+        table.addEventListener("click", async (event) => {
+            const button = event.target.closest("[data-set]");
+            if (!button) return;
 
-function escapeHtml(value) {
+            const customer = customers.find((c) => c.id === button.dataset.id);
+            const action = button.dataset.set === "blocked" ? "deactivate" : "activate";
+            if (!confirm(`Do you want to ${action} ${customer.name}?`)) return;
 
-    return String(value)
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+            try {
+                await api(`/admin/customers/${button.dataset.id}/status`, { method: "PATCH", body: { status: button.dataset.set } });
+                toast("Customer updated");
+                load();
+            } catch (error) {
+                toast(error.message, true);
+            }
+        });
 
-}
-
-
-// ========================================
-// START
-// ========================================
-
-loadCustomers();
-
-</script>
-
-
+        if (requireAdmin()) load();
+    </script>
 </body>
 </html>
-

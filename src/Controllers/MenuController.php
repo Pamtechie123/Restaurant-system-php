@@ -2,169 +2,116 @@
 
 namespace App\Controllers;
 
-use App\Services\MenuService;
-use App\Middleware\RequireRole;
-use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
 class MenuController
 {
-    private MenuService $service;
-
-    public function __construct()
+    // All dishes (customers see unavailable ones marked as "Unavailable")
+    public function list(Request $request, Response $response): Response
     {
-        $this->service = new MenuService();
+        $items = db()->menu_items->find([], ['sort' => ['name' => 1]]);
+
+        return json($response, cleanList($items));
     }
 
-    // PUBLIC ACTION
-    // Customers can view available menu items.
-    public function list(
-        Request $request,
-        Response $response
-    ): Response {
-        $items = $this->service->listAvailable();
+    // One dish
+    public function show(Request $request, Response $response, array $args): Response
+    {
+        $item = db()->menu_items->findOne(['_id' => toObjectId($args['id'])]);
 
-        $response->getBody()->write(
-            json_encode($items)
+        if (!$item) {
+            throw new \Exception('Dish not found', 404);
+        }
+
+        return json($response, cleanDoc($item));
+    }
+
+    // Admin: add a new dish (sent as a form so an image can be uploaded)
+    public function create(Request $request, Response $response): Response
+    {
+        authUser($request, 'admin');
+
+        $data = requireFields($request->getParsedBody(), ['name', 'price', 'category']);
+
+        if (!is_numeric($data['price']) || $data['price'] <= 0) {
+            throw new \Exception('Price must be a number greater than 0', 400);
+        }
+
+        $id = db()->menu_items->insertOne([
+            'name' => trim($data['name']),
+            'description' => trim($data['description'] ?? ''),
+            'price' => (float) $data['price'],
+            'category' => trim($data['category']),
+            'imageUrl' => $this->saveImage($request),
+            'isAvailable' => true,
+        ])->getInsertedId();
+
+        return json($response, ['message' => 'Dish added', 'id' => (string) $id], 201);
+    }
+
+    // Admin: mark a dish available / unavailable
+    public function setAvailability(Request $request, Response $response, array $args): Response
+    {
+        authUser($request, 'admin');
+
+        $data = $request->getParsedBody();
+        if (!isset($data['isAvailable'])) {
+            throw new \Exception('isAvailable is required', 400);
+        }
+
+        db()->menu_items->updateOne(
+            ['_id' => toObjectId($args['id'])],
+            ['$set' => ['isAvailable' => filter_var($data['isAvailable'], FILTER_VALIDATE_BOOLEAN)]]
         );
 
-        return $response
-            ->withHeader('Content-Type', 'application/json');
+        return json($response, ['message' => 'Dish updated']);
     }
 
+    // Admin: remove a dish
+    public function delete(Request $request, Response $response, array $args): Response
+    {
+        authUser($request, 'admin');
 
-    // PUBLIC ACTION
-    // Customers can view a specific menu item.
-    public function get(
-        Request $request,
-        Response $response,
-        array $args
-    ): Response {
-        try {
+        db()->menu_items->deleteOne(['_id' => toObjectId($args['id'])]);
 
-            $item = $this->service->getById($args['id']);
-
-            $response->getBody()->write(
-                json_encode($item)
-            );
-
-            return $response
-                ->withHeader('Content-Type', 'application/json');
-
-        } catch (\Exception $e) {
-
-            $response->getBody()->write(
-                json_encode(['error' => $e->getMessage()])
-            );
-
-            return $response
-                ->withStatus(404)
-                ->withHeader('Content-Type', 'application/json');
-        }
+        return json($response, ['message' => 'Dish deleted']);
     }
 
+    // Save the uploaded image in public/uploads and return its web path.
+    private function saveImage(Request $request): ?string
+    {
+        $file = $request->getUploadedFiles()['image'] ?? null;
 
-    // STAFF / ADMIN ACTION
-    // Only staff and admins can add menu items.
-    public function create(
-        Request $request,
-        Response $response
-    ): Response {
-        try {
-
-            RequireRole::check($request, ['staff', 'admin']);
-
-            $data = $request->getParsedBody();
-
-            $id = $this->service->create($data);
-
-            $response->getBody()->write(
-                json_encode(['id' => $id])
-            );
-
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json');
-
-        } catch (\Exception $e) {
-
-            $response->getBody()->write(
-                json_encode(['error' => $e->getMessage()])
-            );
-
-            return $response
-                ->withStatus($e->getCode() ?: 403)
-                ->withHeader('Content-Type', 'application/json');
+        if (!$file || $file->getError() === UPLOAD_ERR_NO_FILE) {
+            return null;
         }
-    }
-
-
-    // STAFF / ADMIN ACTION
-    // Only staff and admins can edit menu items.
-    public function update(
-        Request $request,
-        Response $response,
-        array $args
-    ): Response {
-        try {
-
-            RequireRole::check($request, ['staff', 'admin']);
-
-            $this->service->update(
-                $args['id'],
-                $request->getParsedBody()
-            );
-
-            $response->getBody()->write(
-                json_encode(['message' => 'Updated'])
-            );
-
-            return $response
-                ->withHeader('Content-Type', 'application/json');
-
-        } catch (\Exception $e) {
-
-            $response->getBody()->write(
-                json_encode(['error' => $e->getMessage()])
-            );
-
-            return $response
-                ->withStatus($e->getCode() ?: 403)
-                ->withHeader('Content-Type', 'application/json');
+        if ($file->getError() !== UPLOAD_ERR_OK) {
+            throw new \Exception('Image upload failed, try again', 400);
         }
-    }
-
-
-    // STAFF / ADMIN ACTION
-    // Only staff and admins can delete menu items.
-    public function delete(
-        Request $request,
-        Response $response,
-        array $args
-    ): Response {
-        try {
-
-            RequireRole::check($request, ['staff', 'admin']);
-
-            $this->service->delete($args['id']);
-
-            $response->getBody()->write(
-                json_encode(['message' => 'Deleted'])
-            );
-
-            return $response
-                ->withHeader('Content-Type', 'application/json');
-
-        } catch (\Exception $e) {
-
-            $response->getBody()->write(
-                json_encode(['error' => $e->getMessage()])
-            );
-
-            return $response
-                ->withStatus($e->getCode() ?: 403)
-                ->withHeader('Content-Type', 'application/json');
+        if ($file->getSize() > 2 * 1024 * 1024) {
+            throw new \Exception('Image must be smaller than 2MB', 400);
         }
+
+        $extension = strtolower(pathinfo($file->getClientFilename(), PATHINFO_EXTENSION));
+        if (!in_array($extension, ['jpg', 'jpeg', 'png', 'webp'], true)) {
+            throw new \Exception('Image must be a jpg, png or webp file', 400);
+        }
+
+        $folder = __DIR__ . '/../../public/uploads';
+        if (!is_dir($folder)) {
+            mkdir($folder, 0777, true);
+        }
+
+        $name = bin2hex(random_bytes(8)) . '.' . $extension;
+        $file->moveTo("$folder/$name");
+
+        // Make sure the file really is a picture
+        if (!@getimagesize("$folder/$name")) {
+            unlink("$folder/$name");
+            throw new \Exception('That file is not a valid image', 400);
+        }
+
+        return "/uploads/$name";
     }
 }
-

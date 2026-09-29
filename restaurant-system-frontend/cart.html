@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart | ChopOps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/config.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header id="navbar" class="sticky top-0 z-40 bg-white/95 shadow-sm backdrop-blur"></header>
+
+    <main class="mx-auto max-w-4xl px-4 py-8">
+        <h1 class="text-3xl font-extrabold">Your Cart</h1>
+        <div id="cart" class="mt-6"></div>
+    </main>
+
+    <footer id="footer"></footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        const box = document.getElementById("cart");
+        let unavailable = []; // ids of dishes in the cart that can no longer be ordered
+
+        function show() {
+            const cart = getCart();
+
+            if (cart.length === 0) {
+                box.innerHTML = `
+                <div class="card p-10 text-center">
+                    <p class="text-lg">Your cart is empty.</p>
+                    <a href="menu.html" class="btn mt-4">Browse the menu</a>
+                </div>`;
+                return;
+            }
+
+            const rows = cart.map((item) => `
+                <div class="card flex items-center gap-4 p-3">
+                    <img src="${imageSrc(item.imageUrl)}" alt="" class="h-20 w-20 rounded-xl object-cover">
+                    <div class="flex-1">
+                        <h3 class="font-bold">${esc(item.name)}</h3>
+                        <p class="text-brand font-semibold">${money(item.price)}</p>
+                        ${unavailable.includes(item.id) ? '<p class="text-sm text-red-600">No longer available. Please remove it.</p>' : ""}
+                    </div>
+                    <div class="flex items-center gap-3 font-bold">
+                        <button data-minus="${item.id}" class="h-8 w-8 rounded-full border border-orange-200">-</button>
+                        <span>${item.quantity}</span>
+                        <button data-plus="${item.id}" class="h-8 w-8 rounded-full border border-orange-200">+</button>
+                    </div>
+                    <button data-remove="${item.id}" class="text-sm font-semibold text-red-600">Remove</button>
+                </div>`).join("");
+
+            box.innerHTML = `
+            <div class="space-y-3">${rows}</div>
+            <div class="card mt-6 flex items-center justify-between p-5">
+                <div>
+                    <p class="text-sm text-ink/60">Total</p>
+                    <p class="text-2xl font-extrabold">${money(cartTotal())}</p>
+                </div>
+                <a href="checkout.html" class="btn ${unavailable.length ? "pointer-events-none opacity-50" : ""}">Proceed to checkout</a>
+            </div>`;
+        }
+
+        box.addEventListener("click", (event) => {
+            const cart = getCart();
+            const button = event.target.closest("button");
+            if (!button) return;
+
+            const id = button.dataset.plus || button.dataset.minus || button.dataset.remove;
+            const line = cart.find((item) => item.id === id);
+            if (!line) return;
+
+            if (button.dataset.plus) line.quantity += 1;
+            if (button.dataset.minus) line.quantity = Math.max(1, line.quantity - 1);
+
+            saveCart(button.dataset.remove ? cart.filter((item) => item.id !== id) : cart);
+            show();
+        });
+
+        show();
+
+        // Make sure the prices in the cart are still up to date
+        loadDishes()
+            .then(() => {
+                const cart = getCart();
+                unavailable = [];
+
+                cart.forEach((item) => {
+                    const dish = DISHES.find((d) => d.id === item.id);
+                    if (!dish || dish.isAvailable === false) {
+                        unavailable.push(item.id);
+                    } else {
+                        item.price = dish.price;
+                    }
+                });
+
+                saveCart(cart);
+                show();
+            })
+            .catch(() => {});
+    </script>
+</body>
+</html>

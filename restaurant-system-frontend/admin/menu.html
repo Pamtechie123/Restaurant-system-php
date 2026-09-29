@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu | ChopOps Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../js/config.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-gray-50 md:flex">
+    <aside id="sidebar" class="bg-ink text-white md:min-h-screen md:w-64 md:shrink-0"></aside>
+
+    <main class="flex-1 p-4 md:p-8">
+        <h1 class="text-3xl font-extrabold">Menu</h1>
+        <p class="text-ink/60">Add new dishes and switch dishes on or off when they run out.</p>
+
+        <div class="mt-6 grid gap-8 xl:grid-cols-3">
+            <!-- Add a dish -->
+            <form id="dish-form" class="card h-fit space-y-4 p-6">
+                <h2 class="text-xl font-bold">Add a new dish</h2>
+
+                <div>
+                    <label for="name" class="label">Name</label>
+                    <input id="name" name="name" class="input" placeholder="e.g. Suya" required>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="price" class="label">Price (₦)</label>
+                        <input id="price" name="price" type="number" min="1" step="any" class="input" required>
+                    </div>
+                    <div>
+                        <label for="category" class="label">Category</label>
+                        <input id="category" name="category" list="category-list" class="input" placeholder="e.g. Grill" required>
+                        <datalist id="category-list"></datalist>
+                    </div>
+                </div>
+                <div>
+                    <label for="description" class="label">Description</label>
+                    <textarea id="description" name="description" rows="3" class="input" placeholder="Tell customers about this dish"></textarea>
+                </div>
+                <div>
+                    <label for="image" class="label">Image (jpg, png or webp, max 2MB)</label>
+                    <input id="image" name="image" type="file" accept="image/png, image/jpeg, image/webp" class="input">
+                    <img id="preview" alt="" class="mt-3 hidden h-32 w-full rounded-xl object-cover">
+                </div>
+
+                <button class="btn w-full">Add dish</button>
+            </form>
+
+            <!-- Dish list -->
+            <section class="xl:col-span-2">
+                <div class="card overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="border-b bg-cream text-ink/70">
+                            <tr><th class="p-3">Dish</th><th class="p-3">Price</th><th class="p-3">Available</th><th class="p-3"></th></tr>
+                        </thead>
+                        <tbody id="dishes"><tr><td colspan="4" class="p-4 text-ink/60">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="../js/app.js"></script>
+    <script src="../js/admin.js"></script>
+    <script>
+        const form = document.getElementById("dish-form");
+        const table = document.getElementById("dishes");
+        const preview = document.getElementById("preview");
+
+        async function load() {
+            try {
+                const dishes = await loadDishes();
+
+                // Suggest the categories that already exist
+                const categories = [...new Set(dishes.map((dish) => dish.category))];
+                document.getElementById("category-list").innerHTML = categories.map((c) => `<option value="${esc(c)}">`).join("");
+
+                table.innerHTML = dishes.length
+                    ? dishes.map((dish) => `
+                    <tr class="border-b last:border-0">
+                        <td class="p-3">
+                            <div class="flex items-center gap-3">
+                                <img src="${imageSrc(dish.imageUrl)}" alt="" class="h-14 w-14 rounded-xl object-cover">
+                                <div>
+                                    <p class="font-bold">${esc(dish.name)}</p>
+                                    <p class="text-xs text-ink/60">${esc(dish.category)}</p>
+                                    <p class="max-w-xs truncate text-xs text-ink/50">${esc(dish.description)}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-3 font-semibold">${money(dish.price)}</td>
+                        <td class="p-3">
+                            <label class="relative inline-flex cursor-pointer items-center">
+                                <input type="checkbox" data-available="${dish.id}" class="peer sr-only" ${dish.isAvailable !== false ? "checked" : ""}>
+                                <div class="h-6 w-11 rounded-full bg-gray-300 transition peer-checked:bg-green-500 after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition after:content-[''] peer-checked:after:translate-x-5"></div>
+                            </label>
+                        </td>
+                        <td class="p-3 text-right"><button data-delete="${dish.id}" class="text-sm font-semibold text-red-600">Delete</button></td>
+                    </tr>`).join("")
+                    : '<tr><td colspan="4" class="p-4 text-ink/60">No dishes yet.</td></tr>';
+            } catch (error) {
+                table.innerHTML = `<tr><td colspan="4" class="p-4 text-red-600">${esc(error.message)}</td></tr>`;
+            }
+        }
+
+        // Show the chosen picture before uploading
+        document.getElementById("image").addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            preview.classList.toggle("hidden", !file);
+            if (file) preview.src = URL.createObjectURL(file);
+        });
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const data = new FormData(form);
+            const category = data.get("category").trim();
+            data.set("category", category.charAt(0).toUpperCase() + category.slice(1)); // "rice" -> "Rice"
+
+            try {
+                await api("/admin/menu", { method: "POST", body: data });
+                toast("Dish added");
+                form.reset();
+                preview.classList.add("hidden");
+                load();
+            } catch (error) {
+                toast(error.message, true);
+            }
+        });
+
+        // Availability switch
+        table.addEventListener("change", async (event) => {
+            const box = event.target.closest("[data-available]");
+            if (!box) return;
+
+            try {
+                await api("/admin/menu/" + box.dataset.available, { method: "PATCH", body: { isAvailable: box.checked } });
+                toast(box.checked ? "Dish is now available" : "Dish marked as unavailable");
+            } catch (error) {
+                box.checked = !box.checked;
+                toast(error.message, true);
+            }
+        });
+
+        // Delete button
+        table.addEventListener("click", async (event) => {
+            const button = event.target.closest("[data-delete]");
+            if (!button || !confirm("Delete this dish? This cannot be undone.")) return;
+
+            try {
+                await api("/admin/menu/" + button.dataset.delete, { method: "DELETE" });
+                toast("Dish deleted");
+                load();
+            } catch (error) {
+                toast(error.message, true);
+            }
+        });
+
+        if (requireAdmin()) load();
+    </script>
+</body>
+</html>

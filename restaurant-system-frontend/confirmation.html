@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation | ChopOps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/config.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header id="navbar" class="sticky top-0 z-40 bg-white/95 shadow-sm backdrop-blur"></header>
+
+    <main class="mx-auto max-w-2xl px-4 py-10">
+        <div id="order"><p class="text-ink/60">Loading your order...</p></div>
+    </main>
+
+    <footer id="footer"></footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        const box = document.getElementById("order");
+
+        if (requireLogin()) {
+            const id = new URLSearchParams(location.search).get("id");
+
+            api("/orders/" + id)
+                .then((order) => {
+                    const items = order.items
+                        .map((item) => `
+                            <div class="flex justify-between">
+                                <span>${item.quantity} × ${esc(item.name)}</span>
+                                <span>${money(item.price * item.quantity)}</span>
+                            </div>`)
+                        .join("");
+
+                    let where = "";
+                    if (order.orderType === "delivery") where = `Delivering to ${esc(order.shippingAddress)}, ${esc(order.city)}, ${esc(order.state)}`;
+                    if (order.orderType === "dine-in") where = `Dine-in at table ${order.tableNumber}`;
+                    if (order.orderType === "takeaway") where = "Pick up at the restaurant";
+
+                    box.innerHTML = `
+                    <div class="card p-8 text-center">
+                        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-3xl text-green-600">✓</div>
+                        <h1 class="mt-4 text-3xl font-extrabold">Order placed!</h1>
+                        <p class="mt-1 text-ink/70">Thank you. We have received your order and will start on it soon.</p>
+
+                        <div class="mt-6 space-y-2 rounded-2xl bg-cream p-5 text-left">
+                            <div class="flex justify-between"><span class="text-ink/60">Order number</span><b>#${order.id.slice(-6).toUpperCase()}</b></div>
+                            <div class="flex justify-between"><span class="text-ink/60">Status</span>${badge(order.status)}</div>
+                            <div class="flex justify-between"><span class="text-ink/60">Type</span><b class="capitalize">${esc(order.orderType)}</b></div>
+                            <p class="text-sm">${where}</p>
+                            <div class="space-y-1 border-t pt-3">${items}</div>
+                            <div class="flex justify-between border-t pt-3 text-lg font-extrabold"><span>Total</span><span>${money(order.total)}</span></div>
+                        </div>
+
+                        <div class="mt-6 flex justify-center gap-3">
+                            <a href="orders.html" class="btn">Track my orders</a>
+                            <a href="menu.html" class="btn btn-outline">Back to menu</a>
+                        </div>
+                    </div>`;
+                })
+                .catch((error) => {
+                    box.innerHTML = `<p class="text-red-600">${esc(error.message)}</p>`;
+                });
+        }
+    </script>
+</body>
+</html>

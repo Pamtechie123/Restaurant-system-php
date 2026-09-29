@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Admin Account | ChopOps Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../js/config.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="relative min-h-screen overflow-x-hidden bg-cream">
+    <img src="../images/splash.webp" alt="" class="pointer-events-none absolute -left-10 top-0 h-72 sm:h-[28rem]">
+
+    <main class="relative mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-10">
+        <img src="../images/logo.png" alt="ChopOps" class="mx-auto h-24">
+        <p class="mt-1 text-center text-xs tracking-widest">ADMIN <span class="text-brand">PORTAL</span></p>
+
+        <h1 class="mt-6 text-center text-3xl font-extrabold">Create Admin Account</h1>
+        <p class="text-center text-ink/70">You need the admin code from the restaurant owner.</p>
+
+        <form id="register-form" class="mt-6 space-y-4 rounded-3xl bg-white/90 p-6 shadow-lg">
+            <div>
+                <label for="name" class="label">Full Name</label>
+                <input id="name" class="input" placeholder="Enter your full name" required>
+            </div>
+            <div>
+                <label for="email" class="label">Email Address</label>
+                <input id="email" type="email" class="input" placeholder="Enter your email" required>
+            </div>
+            <div>
+                <label for="password" class="label">Password</label>
+                <div class="relative">
+                    <input id="password" type="password" minlength="6" class="input pr-16" placeholder="Create a password" required>
+                    <button type="button" data-toggle="password" class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-brand">SHOW</button>
+                </div>
+            </div>
+            <div>
+                <label for="confirm" class="label">Confirm password</label>
+                <div class="relative">
+                    <input id="confirm" type="password" class="input pr-16" placeholder="Confirm your password" required>
+                    <button type="button" data-toggle="confirm" class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-brand">SHOW</button>
+                </div>
+            </div>
+            <div>
+                <label for="adminCode" class="label">Admin code</label>
+                <input id="adminCode" type="password" class="input" placeholder="Secret admin code" required>
+            </div>
+
+            <p id="message" class="hidden text-center text-sm"></p>
+            <button class="btn w-full">Create admin account</button>
+
+            <p class="text-center text-sm">Already an admin? <a href="login.html" class="font-bold text-brand">Login</a></p>
+        </form>
+    </main>
+
+    <script src="../js/app.js"></script>
+    <script src="../js/admin.js"></script>
+    <script>
+        const form = document.getElementById("register-form");
+        const message = document.getElementById("message");
+
+        function showMessage(text, isError) {
+            message.textContent = text;
+            message.className = "text-center text-sm " + (isError ? "text-red-600" : "text-green-600");
+        }
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const password = document.getElementById("password").value;
+            if (password !== document.getElementById("confirm").value) {
+                showMessage("Passwords do not match", true);
+                return;
+            }
+
+            try {
+                await api("/admin/register", {
+                    method: "POST",
+                    body: {
+                        name: document.getElementById("name").value,
+                        email: document.getElementById("email").value,
+                        password: password,
+                        adminCode: document.getElementById("adminCode").value,
+                    },
+                });
+                showMessage("Admin account created! Taking you to login...", false);
+                setTimeout(() => (location.href = "login.html"), 1200);
+            } catch (error) {
+                showMessage(error.message, true);
+            }
+        });
+    </script>
+</body>
+</html>

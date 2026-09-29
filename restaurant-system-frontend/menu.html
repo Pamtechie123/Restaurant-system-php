@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu | ChopOps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/config.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header id="navbar" class="sticky top-0 z-40 bg-white/95 shadow-sm backdrop-blur"></header>
+
+    <main class="mx-auto max-w-6xl px-4 py-8">
+        <input id="search" type="search" class="input py-3" placeholder="Search for food...">
+
+        <div id="categories" class="mt-5 flex gap-3 overflow-x-auto pb-2"></div>
+
+        <h2 class="mt-8 text-xl font-bold">Popular dishes</h2>
+        <div id="dishes" class="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4">
+            <p class="col-span-full text-ink/60">Loading dishes...</p>
+        </div>
+    </main>
+
+    <footer id="footer"></footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        const searchInput = document.getElementById("search");
+        const categoryBox = document.getElementById("categories");
+        const dishBox = document.getElementById("dishes");
+
+        let category = "All";
+
+        // Show the dishes that match the chosen category and the search text
+        function showDishes() {
+            const text = searchInput.value.trim().toLowerCase();
+
+            const matches = DISHES.filter((dish) => {
+                const inCategory = category === "All" || dish.category === category;
+                const inSearch = dish.name.toLowerCase().includes(text);
+                return inCategory && inSearch;
+            });
+
+            dishBox.innerHTML = matches.length
+                ? matches.map(dishCard).join("")
+                : '<p class="col-span-full text-ink/60">No dishes found.</p>';
+        }
+
+        function showCategories() {
+            const names = ["All", ...new Set(DISHES.map((dish) => dish.category))];
+
+            categoryBox.innerHTML = names
+                .map((name) => `<button class="pill ${name === category ? "active" : ""}" data-category="${esc(name)}">${esc(name)}</button>`)
+                .join("");
+        }
+
+        categoryBox.addEventListener("click", (event) => {
+            const button = event.target.closest("[data-category]");
+            if (!button) return;
+
+            category = button.dataset.category;
+            showCategories();
+            showDishes();
+        });
+
+        searchInput.addEventListener("input", showDishes);
+
+        loadDishes()
+            .then(() => {
+                showCategories();
+                showDishes();
+            })
+            .catch((error) => {
+                dishBox.innerHTML = `<p class="col-span-full text-red-600">${esc(error.message)}</p>`;
+            });
+    </script>
+</body>
+</html>

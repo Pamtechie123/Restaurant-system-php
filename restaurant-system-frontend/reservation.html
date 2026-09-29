@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserve a Table | ChopOps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/config.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header id="navbar" class="sticky top-0 z-40 bg-white/95 shadow-sm backdrop-blur"></header>
+
+    <main class="mx-auto grid max-w-5xl gap-8 px-4 py-8 md:grid-cols-2">
+        <section>
+            <h1 class="text-3xl font-extrabold">Reserve a table</h1>
+            <p class="mt-1 text-ink/70">Plan a special meal. We will confirm your request and give you a table number.</p>
+
+            <form id="reservation-form" class="card mt-6 space-y-4 p-6">
+                <div>
+                    <label for="customerName" class="label">Name</label>
+                    <input id="customerName" class="input" required>
+                </div>
+                <div>
+                    <label for="phone" class="label">Phone number</label>
+                    <input id="phone" type="tel" class="input" placeholder="080..." required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="date" class="label">Date</label>
+                        <input id="date" type="date" class="input" required>
+                    </div>
+                    <div>
+                        <label for="time" class="label">Time</label>
+                        <input id="time" type="time" class="input" required>
+                    </div>
+                </div>
+                <div>
+                    <label for="partySize" class="label">Number of guests</label>
+                    <input id="partySize" type="number" min="1" value="2" class="input" required>
+                </div>
+
+                <p id="message" class="hidden text-sm"></p>
+                <button class="btn w-full">Request reservation</button>
+            </form>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold">My reservations</h2>
+            <div id="list" class="mt-4 space-y-3"><p class="text-ink/60">Loading...</p></div>
+        </section>
+    </main>
+
+    <footer id="footer"></footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        const form = document.getElementById("reservation-form");
+        const message = document.getElementById("message");
+        const list = document.getElementById("list");
+
+        async function loadReservations() {
+            try {
+                const reservations = await api("/reservations/mine");
+
+                list.innerHTML = reservations.length
+                    ? reservations.map((r) => `
+                        <div class="card flex items-center justify-between gap-3 p-4">
+                            <div>
+                                <p class="font-bold">${formatDay(r.date)} at ${esc(r.time)}</p>
+                                <p class="text-sm text-ink/60">${r.partySize} guest(s)${r.tableNumber ? " · Table " + r.tableNumber : ""}</p>
+                            </div>
+                            ${badge(r.status)}
+                        </div>`).join("")
+                    : '<p class="text-ink/60">You have no reservations yet.</p>';
+            } catch (error) {
+                list.innerHTML = `<p class="text-red-600">${esc(error.message)}</p>`;
+            }
+        }
+
+        if (requireLogin()) {
+            document.getElementById("customerName").value = getUser().name;
+            document.getElementById("date").min = new Date().toLocaleDateString("en-CA"); // today, as YYYY-MM-DD
+            loadReservations();
+        }
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            try {
+                await api("/reservations", {
+                    method: "POST",
+                    body: {
+                        customerName: document.getElementById("customerName").value,
+                        phone: document.getElementById("phone").value,
+                        date: document.getElementById("date").value,
+                        time: document.getElementById("time").value,
+                        partySize: Number(document.getElementById("partySize").value),
+                    },
+                });
+
+                message.textContent = "Reservation requested! We will confirm it shortly.";
+                message.className = "text-sm text-green-600";
+                loadReservations();
+            } catch (error) {
+                message.textContent = error.message;
+                message.className = "text-sm text-red-600";
+            }
+        });
+    </script>
+</body>
+</html>

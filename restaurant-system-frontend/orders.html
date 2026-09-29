@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders | ChopOps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/config.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header id="navbar" class="sticky top-0 z-40 bg-white/95 shadow-sm backdrop-blur"></header>
+
+    <main class="mx-auto max-w-3xl px-4 py-8">
+        <h1 class="text-3xl font-extrabold">My Orders</h1>
+        <div id="orders" class="mt-6 space-y-4"><p class="text-ink/60">Loading...</p></div>
+    </main>
+
+    <footer id="footer"></footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        const box = document.getElementById("orders");
+        const steps = ["pending", "preparing", "ready", "served"];
+
+        // A small progress bar: pending > preparing > ready > served
+        function progress(status) {
+            if (status === "cancelled") return "";
+            const current = steps.indexOf(status);
+
+            return `<div class="mt-3 flex gap-1">${steps
+                .map((step, i) => `<div class="flex-1"><div class="h-1.5 rounded-full ${i <= current ? "bg-brand" : "bg-gray-200"}"></div>
+                    <p class="mt-1 text-center text-[11px] capitalize text-ink/60">${step}</p></div>`)
+                .join("")}</div>`;
+        }
+
+        async function load() {
+            try {
+                const orders = await api("/orders/my-orders");
+
+                if (orders.length === 0) {
+                    box.innerHTML = '<div class="card p-10 text-center">You have not ordered anything yet.<br><a href="menu.html" class="btn mt-4">Browse the menu</a></div>';
+                    return;
+                }
+
+                box.innerHTML = orders.map((order) => `
+                    <article class="card p-5">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <h2 class="font-bold">Order #${order.id.slice(-6).toUpperCase()}</h2>
+                                <p class="text-sm text-ink/60">${formatDate(order.createdAt)} · <span class="capitalize">${esc(order.orderType)}</span></p>
+                            </div>
+                            ${badge(order.status)}
+                        </div>
+                        <p class="mt-3 text-sm">${order.items.map((item) => `${item.quantity} × ${esc(item.name)}`).join(", ")}</p>
+                        <p class="mt-2 font-extrabold">${money(order.total)}</p>
+                        ${progress(order.status)}
+                    </article>`).join("");
+            } catch (error) {
+                box.innerHTML = `<p class="text-red-600">${esc(error.message)}</p>`;
+            }
+        }
+
+        if (requireLogin()) {
+            load();
+            setInterval(load, 30000); // refresh the statuses every 30 seconds
+        }
+    </script>
+</body>
+</html>

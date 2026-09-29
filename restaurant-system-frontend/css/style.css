@@ -1,348 +1,81 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+/* Small set of reusable styles. Layout is done with Tailwind classes in the HTML. */
 
 :root {
-    --primary: #f4511e;
-    --primary-dark: #d83d0e;
-    --dark: #171717;
-    --text: #292929;
-    --muted: #777;
-    --light: #fff8f4;
-    --border: #eeeeee;
+    --brand: #f26b0c;
+    --ink: #2b120c;
 }
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
-    color: var(--text);
-    background: #ffffff;
-    line-height: 1.6;
+    font-family: "Nunito", system-ui, sans-serif;
+    color: var(--ink);
+    background: #fff;
 }
 
-a {
-    text-decoration: none;
-    color: inherit;
-}
-
-/* NAVBAR */
-
-.navbar {
-    height: 80px;
-    padding: 0 7%;
-    display: flex;
+/* Buttons */
+.btn {
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-    background: white;
-}
-
-.logo {
-    font-size: 30px;
-    font-weight: 800;
-    letter-spacing: -2px;
-}
-
-.logo span {
-    color: #171717;
-}
-
-.logo strong {
-    color: var(--primary);
-}
-
-.nav-links {
-    display: flex;
-    gap: 32px;
-}
-
-.nav-links a {
-    font-size: 15px;
-    font-weight: 500;
-}
-
-.nav-links a:hover {
-    color: var(--primary);
-}
-
-.nav-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.login-btn {
-    padding: 10px 18px;
-}
-
-.cart-btn,
-.primary-btn {
-    background: var(--primary);
-    color: white;
-    padding: 11px 20px;
-    border-radius: 8px;
-}
-
-.cart-btn:hover,
-.primary-btn:hover {
-    background: var(--primary-dark);
-}
-
-#cart-count {
-    background: white;
-    color: var(--primary);
-    padding: 2px 7px;
-    border-radius: 50%;
-    margin-left: 4px;
-}
-
-/* HERO */
-
-.hero {
-    min-height: 560px;
-    padding: 70px 7%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: center;
-    gap: 60px;
-    background: var(--light);
-}
-
-.hero-content {
-    max-width: 570px;
-}
-
-.eyebrow {
-    color: var(--primary);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    margin-bottom: 10px;
-}
-
-.hero h1 {
-    font-size: clamp(42px, 5vw, 68px);
-    line-height: 1.05;
-    letter-spacing: -3px;
-    margin-bottom: 25px;
-}
-
-.hero h1 span {
-    display: block;
-    color: var(--primary);
-}
-
-.hero-text {
-    color: var(--muted);
-    font-size: 17px;
-    max-width: 500px;
-    margin-bottom: 30px;
-}
-
-.hero-buttons {
-    display: flex;
-    gap: 14px;
-}
-
-.secondary-btn {
-    border: 1px solid var(--primary);
-    color: var(--primary);
-    padding: 11px 20px;
-    border-radius: 8px;
-}
-
-.hero-image {
-    display: flex;
     justify-content: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.5rem;
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #ff7a00, #f04e0a);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
 }
+.btn:hover { filter: brightness(0.95); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-outline { background: #fff; border-color: var(--brand); color: var(--brand); }
+.btn-danger { background: #dc2626; }
+.btn-sm { padding: 0.35rem 1rem; font-size: 0.875rem; }
 
-.hero-image img {
-    width: min(100%, 500px);
-    height: 430px;
-    object-fit: cover;
-    border-radius: 30px;
-}
-
-/* FEATURED */
-
-.featured {
-    padding: 80px 7%;
-}
-
-.section-heading {
-    display: flex;
-    align-items: end;
-    justify-content: space-between;
-    margin-bottom: 30px;
-}
-
-.section-heading h2 {
-    font-size: 36px;
-}
-
-.section-heading > a {
-    color: var(--primary);
+/* Navigation pills (the active page is outlined, like in the design) */
+.pill {
+    padding: 0.4rem 1.1rem;
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #ff7a00, #f04e0a);
+    color: #fff;
+    font-size: 0.9rem;
     font-weight: 600;
-}
-
-.food-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 22px;
-}
-
-.food-card {
-    border: 1px solid var(--border);
-    border-radius: 15px;
-    overflow: hidden;
-    background: white;
-    transition: transform 0.2s;
-}
-
-.food-card:hover {
-    transform: translateY(-4px);
-}
-
-.food-card img {
-    width: 100%;
-    height: 190px;
-    object-fit: cover;
-}
-
-.food-info {
-    padding: 16px;
-}
-
-.food-info h3 {
-    margin-bottom: 5px;
-}
-
-.food-info p {
-    color: var(--muted);
-    font-size: 14px;
-}
-
-.food-price {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 14px;
-}
-
-.food-price strong {
-    color: var(--primary);
-}
-
-.add-btn {
-    border: none;
-    background: var(--primary);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
+    white-space: nowrap;
     cursor: pointer;
 }
+.pill.active { background: #fff; border-color: var(--brand); color: var(--brand); }
 
-/* RESERVATION */
+/* Forms */
+.input {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 0.75rem;
+    background: #fff;
+    outline: none;
+}
+.input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(242, 107, 12, 0.15); }
+.label { display: block; margin-bottom: 0.3rem; font-size: 0.9rem; font-weight: 600; }
 
-.reservation-banner {
-    margin: 0 7% 70px;
-    padding: 40px;
-    border-radius: 18px;
-    background: var(--dark);
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 30px;
+/* Cards */
+.card {
+    border-radius: 1.25rem;
+    background: #fff;
+    box-shadow: 0 6px 24px rgba(43, 18, 12, 0.08);
 }
 
-.reservation-banner h2 {
-    max-width: 650px;
+/* Status badges: the class name is badge-<status> */
+.badge {
+    display: inline-block;
+    padding: 0.15rem 0.7rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: capitalize;
 }
-
-/* FOOTER */
-
-footer {
-    padding: 45px 7%;
-    border-top: 1px solid var(--border);
-    text-align: center;
-}
-
-.footer-logo {
-    font-size: 28px;
-    font-weight: 800;
-}
-
-.footer-logo strong {
-    color: var(--primary);
-}
-
-footer p {
-    color: var(--muted);
-}
-
-.copyright {
-    margin-top: 20px;
-    font-size: 13px;
-}
-
-/* LOADING */
-
-.loading {
-    grid-column: 1 / -1;
-    padding: 50px;
-    text-align: center;
-    color: var(--muted);
-}
-
-
-/* MOBILE */
-
-@media (max-width: 900px) {
-
-    .nav-links {
-        display: none;
-    }
-
-    .hero {
-        grid-template-columns: 1fr;
-        padding-top: 45px;
-    }
-
-    .food-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .reservation-banner {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-}
-
-@media (max-width: 550px) {
-
-    .navbar {
-        padding: 0 5%;
-    }
-
-    .hero {
-        padding: 45px 5%;
-    }
-
-    .hero h1 {
-        font-size: 44px;
-    }
-
-    .hero-buttons {
-        flex-direction: column;
-    }
-
-    .food-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .featured {
-        padding: 60px 5%;
-    }
-}
+.badge-pending, .badge-requested { background: #fef3c7; color: #92400e; }
+.badge-preparing, .badge-confirmed { background: #dbeafe; color: #1e40af; }
+.badge-ready, .badge-seated { background: #ede9fe; color: #5b21b6; }
+.badge-served, .badge-completed, .badge-active { background: #dcfce7; color: #166534; }
+.badge-cancelled, .badge-blocked { background: #fee2e2; color: #991b1b; }

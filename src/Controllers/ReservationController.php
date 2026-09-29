@@ -2,159 +2,103 @@
 
 namespace App\Controllers;
 
-use App\Services\ReservationService;
-use App\Middleware\RequireRole;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use MongoDB\BSON\UTCDateTime;
 use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
 class ReservationController
 {
-    private ReservationService $service;
-
-    public function __construct()
-    {
-        $this->service = new ReservationService();
-    }
-
-    // CUSTOMER ACTION
-    // Customers can create reservations.
+    // Customer: request a table
     public function create(Request $request, Response $response): Response
     {
-        try {
-            $userId = $request->getAttribute('userId');
+        $user = authUser($request, 'customer');
+        $data = requireFields(
+            $request->getParsedBody(),
+            ['customerName', 'phone', 'date', 'time', 'partySize']
+        );
 
-            $id = $this->service->create(
-                $userId,
-                $request->getParsedBody()
-            );
+        $date = trim($data['date']);
+        $time = trim($data['time']);
 
-            $response->getBody()->write(
-                json_encode(['id' => $id])
-            );
-
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json');
-
-        } catch (\Exception $e) {
-
-            $response->getBody()->write(
-                json_encode(['error' => $e->getMessage()])
-            );
-
-            return $response
-                ->withStatus(400)
-                ->withHeader('Content-Type', 'application/json');
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !checkdate((int) substr($date, 5, 2), (int) substr($date, 8, 2), (int) substr($date, 0, 4))) {
+            throw new \Exception('Invalid date', 400);
         }
+        if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $time)) {
+            throw new \Exception('Invalid time, use HH:MM', 400);
+        }
+        if (strtotime("$date $time") < time()) {
+            throw new \Exception('Please choose a date and time in the future', 400);
+        }
+        if (!preg_match('/^[0-9+\-\s()]{7,20}$/', $data['phone'])) {
+            throw new \Exception('Enter a valid phone number', 400);
+        }
+        if ((int) $data['partySize'] < 1) {
+            throw new \Exception('Party size must be at least 1', 400);
+        }
+
+        $id = db()->reservations->insertOne([
+            'userId' => (string) $user['_id'],
+            'customerName' => trim($data['customerName']),
+            'phone' => trim($data['phone']),
+            'partySize' => (int) $data['partySize'],
+            'date' => $date,
+            'time' => $time,
+            'status' => 'requested',
+            'tableNumber' => null,
+            'createdAt' => new UTCDateTime(),
+        ])->getInsertedId();
+
+        return json($response, ['message' => 'Reservation requested', 'id' => (string) $id], 201);
     }
 
-
-    // STAFF / ADMIN ACTION
-    // Only staff and admins can view reservations.
-    public function list(Request $request, Response $response): Response
+    // Customer: my reservations
+    public function mine(Request $request, Response $response): Response
     {
-        try {
+        $user = authUser($request, 'customer');
 
-            RequireRole::check($request, ['staff', 'admin']);
+        $reservations = db()->reservations->find(
+            ['userId' => (string) $user['_id']],
+            ['sort' => ['date' => -1, 'time' => -1]]
+        );
 
-            $params = $request->getQueryParams();
-
-            $reservations = $this->service->listAll(
-                $params['date'] ?? null
-            );
-
-            $response->getBody()->write(
-                json_encode($reservations)
-            );
-
-            return $response
-                ->withHeader('Content-Type', 'application/json');
-
-        } catch (\Exception $e) {
-
-            $response->getBody()->write(
-                json_encode(['error' => $e->getMessage()])
-            );
-
-            return $response
-                ->withStatus($e->getCode() ?: 403)
-                ->withHeader('Content-Type', 'application/json');
-        }
+        return json($response, cleanList($reservations));
     }
 
+    // Admin: all reservations (soonest first)
+    public function adminList(Request $request, Response $response): Response
+    {
+        authUser($request, 'admin');
 
-    // STAFF / ADMIN ACTION
-    // Only staff and admins can confirm reservations.
-    public function confirm(
-        Request $request,
-        Response $response,
-        array $args
-    ): Response {
-        try {
+        $reservations = db()->reservations->find([], ['sort' => ['date' => 1, 'time' => 1]]);
 
-            RequireRole::check($request, ['staff', 'admin']);
-
-            $data = $request->getParsedBody();
-
-            $this->service->confirm(
-                $args['id'],
-                (int) $data['tableNumber']
-            );
-
-            $response->getBody()->write(
-                json_encode(['message' => 'Confirmed'])
-            );
-
-            return $response
-                ->withHeader('Content-Type', 'application/json');
-
-        } catch (\Exception $e) {
-
-            $response->getBody()->write(
-                json_encode(['error' => $e->getMessage()])
-            );
-
-            return $response
-                ->withStatus($e->getCode() ?: 403)
-                ->withHeader('Content-Type', 'application/json');
-        }
+        return json($response, cleanList($reservations));
     }
 
+    // Admin: confirm (with a table number), seat, complete or cancel
+    public function update(Request $request, Response $response, array $args): Response
+    {
+        authUser($request, 'admin');
 
-    // STAFF / ADMIN ACTION
-    // Only staff and admins can change reservation status.
-    public function updateStatus(
-        Request $request,
-        Response $response,
-        array $args
-    ): Response {
-        try {
+        $data = requireFields($request->getParsedBody(), ['status']);
+        $changes = ['status' => $data['status']];
 
-            RequireRole::check($request, ['staff', 'admin']);
-
-            $data = $request->getParsedBody();
-
-            $this->service->updateStatus(
-                $args['id'],
-                $data['status']
-            );
-
-            $response->getBody()->write(
-                json_encode(['message' => 'Updated'])
-            );
-
-            return $response
-                ->withHeader('Content-Type', 'application/json');
-
-        } catch (\Exception $e) {
-
-            $response->getBody()->write(
-                json_encode(['error' => $e->getMessage()])
-            );
-
-            return $response
-                ->withStatus($e->getCode() ?: 403)
-                ->withHeader('Content-Type', 'application/json');
+        if (!in_array($data['status'], ['requested', 'confirmed', 'seated', 'completed', 'cancelled'], true)) {
+            throw new \Exception('Invalid status', 400);
         }
+
+        if ($data['status'] === 'confirmed') {
+            $table = (int) ($data['tableNumber'] ?? 0);
+            if ($table < 1) {
+                throw new \Exception('Give the reservation a table number', 400);
+            }
+            $changes['tableNumber'] = $table;
+        }
+
+        db()->reservations->updateOne(
+            ['_id' => toObjectId($args['id'])],
+            ['$set' => $changes]
+        );
+
+        return json($response, ['message' => 'Reservation updated']);
     }
 }

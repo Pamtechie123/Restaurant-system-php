@@ -1,189 +1,40 @@
 <?php
 
-use Slim\Routing\RouteCollectorProxy;
+// All API routes in one place. $app comes from public/index.php
 
+use App\Controllers\AdminController;
 use App\Controllers\AuthController;
 use App\Controllers\MenuController;
 use App\Controllers\OrderController;
 use App\Controllers\ReservationController;
-use App\Controllers\UserController;
 
-use App\Middleware\AuthMiddleware;
+// ----- Public -----
+$app->post('/api/auth/register', [AuthController::class, 'register']);
+$app->post('/api/auth/login', [AuthController::class, 'login']);
+$app->get('/api/menu', [MenuController::class, 'list']);
+$app->get('/api/menu/{id}', [MenuController::class, 'show']);
 
-return function ($app) {
+// ----- Customer (must be logged in) -----
+$app->post('/api/orders', [OrderController::class, 'create']);
+$app->get('/api/orders/my-orders', [OrderController::class, 'mine']);
+$app->get('/api/orders/{id}', [OrderController::class, 'show']);
+$app->post('/api/reservations', [ReservationController::class, 'create']);
+$app->get('/api/reservations/mine', [ReservationController::class, 'mine']);
 
-    // ============================================
-    // CONTROLLERS
-    // ============================================
+// ----- Admin -----
+$app->post('/api/admin/register', [AuthController::class, 'adminRegister']);
+$app->post('/api/admin/login', [AuthController::class, 'adminLogin']);
 
-    $auth = new AuthController();
-    $menu = new MenuController();
-    $order = new OrderController();
-    $reservation = new ReservationController();
-    $user = new UserController();
+$app->get('/api/admin/stats', [AdminController::class, 'stats']);
+$app->get('/api/admin/customers', [AdminController::class, 'customers']);
+$app->patch('/api/admin/customers/{id}/status', [AdminController::class, 'setCustomerStatus']);
 
+$app->get('/api/admin/orders', [OrderController::class, 'adminList']);
+$app->patch('/api/admin/orders/{id}/status', [OrderController::class, 'setStatus']);
 
-    // ============================================
-    // MIDDLEWARE
-    // ============================================
+$app->post('/api/admin/menu', [MenuController::class, 'create']);
+$app->patch('/api/admin/menu/{id}', [MenuController::class, 'setAvailability']);
+$app->delete('/api/admin/menu/{id}', [MenuController::class, 'delete']);
 
-    $authMiddleware = new AuthMiddleware();
-
-
-    // ============================================
-    // AUTHENTICATION
-    // ============================================
-
-    // Register
-    $app->post(
-        '/api/auth/register',
-        [$auth, 'register']
-    );
-
-    // Login
-    $app->post(
-        '/api/auth/login',
-        [$auth, 'login']
-    );
-
-
-    // ============================================
-    // PUBLIC MENU
-    // ============================================
-
-    // Get available menu items
-    $app->get(
-        '/api/menu',
-        [$menu, 'list']
-    );
-
-    // Get one menu item
-    $app->get(
-        '/api/menu/{id}',
-        [$menu, 'get']
-    );
-
-
-    // ============================================
-    // MENU MANAGEMENT
-    // ============================================
-    //
-    // The routes require a valid JWT.
-    // MenuController then checks that the user
-    // is staff or admin before performing changes.
-    //
-
-    $app->group(
-        '/api/menu',
-        function (RouteCollectorProxy $group) use ($menu) {
-
-            // Add menu item
-            $group->post(
-                '',
-                [$menu, 'create']
-            );
-
-            // Edit menu item
-            $group->put(
-                '/{id}',
-                [$menu, 'update']
-            );
-
-            // Delete menu item
-            $group->delete(
-                '/{id}',
-                [$menu, 'delete']
-            );
-
-        }
-    )->add($authMiddleware);
-
-
-    // ============================================
-    // ORDERS
-    // ============================================
-
-    $app->group(
-        '/api/orders',
-        function (RouteCollectorProxy $group) use ($order) {
-
-            // Customer creates an order
-            $group->post(
-                '',
-                [$order, 'create']
-            );
-
-            // Staff/admin view active orders
-            $group->get(
-                '',
-                [$order, 'listActive']
-            );
-
-            // Staff/admin change order status
-            $group->patch(
-                '/{id}/status',
-                [$order, 'updateStatus']
-            );
-
-        }
-    )->add($authMiddleware);
-
-
-    // ============================================
-    // RESERVATIONS
-    // ============================================
-
-    $app->group(
-        '/api/reservations',
-        function (RouteCollectorProxy $group) use ($reservation) {
-
-            // Customer creates reservation
-            $group->post(
-                '',
-                [$reservation, 'create']
-            );
-
-            // Staff/admin view reservations
-            $group->get(
-                '',
-                [$reservation, 'list']
-            );
-
-            // Staff/admin confirm reservation
-            $group->patch(
-                '/{id}/confirm',
-                [$reservation, 'confirm']
-            );
-
-            // Staff/admin change reservation status
-            $group->patch(
-                '/{id}/status',
-                [$reservation, 'updateStatus']
-            );
-
-        }
-    )->add($authMiddleware);
-
-
-    // ============================================
-    // CUSTOMER MANAGEMENT
-    // ============================================
-    //
-    // UserController itself checks that the
-    // authenticated user is staff/admin.
-    //
-
-    $app->group(
-        '/api/users',
-        function (RouteCollectorProxy $group) use ($user) {
-
-            // Staff/admin can view customers
-            $group->get(
-                '/customers',
-                [$user, 'listCustomers']
-            );
-
-        }
-    )->add($authMiddleware);
-
-};
+$app->get('/api/admin/reservations', [ReservationController::class, 'adminList']);
+$app->patch('/api/admin/reservations/{id}', [ReservationController::class, 'update']);
