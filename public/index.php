@@ -10,9 +10,8 @@ use Slim\Factory\AppFactory;
 use Slim\Psr7\Response;
 
 // Load the values in .env (MONGODB_URI, JWT_SECRET, ADMIN_CODE ...)
-   $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
-   $dotenv->safeload();
-   
+Dotenv::createImmutable(__DIR__ . '/..')->safeload();
+
 // Reservation times are compared using this timezone
 date_default_timezone_set('Africa/Lagos');
 
